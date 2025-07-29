@@ -1,6 +1,6 @@
 import type { News } from '@/types/news'
 import { ExternalLink, Calendar } from 'lucide-react'
-import { RussianEmblem } from './russian-emblem'
+import { NewsLogo } from './news-logo'
 
 interface NewsCardProps {
   news: News
@@ -26,11 +26,9 @@ export function NewsCard({ news }: NewsCardProps) {
   return (
     <article className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-start space-x-4">
-        {/* Российский герб */}
+        {/* Логотип новостей */}
         <div className="flex-shrink-0">
-          <div className="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center p-1">
-            <RussianEmblem size={40} />
-          </div>
+          <NewsLogo size={48} />
         </div>
         
         <div className="flex-1 min-w-0">

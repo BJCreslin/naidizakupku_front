@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { News, NewsResponse } from '@/types/news'
 import { NewsCard } from './news-card'
 import { Loading } from './loading'
@@ -13,8 +13,13 @@ export function NewsList({ className }: NewsListProps) {
   const [news, setNews] = useState<News[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const hasFetched = useRef(false)
 
   useEffect(() => {
+    // Предотвращаем дублирование запросов в React.StrictMode
+    if (hasFetched.current) return
+    hasFetched.current = true
+
     async function fetchNews() {
       try {
         setIsLoading(true)
