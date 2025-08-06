@@ -48,7 +48,15 @@ pipeline {
         
         stage('Build') {
             steps {
-                sh 'npm run build'
+                sh '''
+                    echo "Building Next.js application..."
+                    npm run build
+                    
+                    echo "Build completed, checking .next directory:"
+                    ls -la .next/
+                    echo "Build artifacts:"
+                    du -sh .next/
+                '''
             }
         }
         
@@ -175,24 +183,47 @@ pipeline {
                             exit 0
                         fi
                         
-                        # Automated deployment - install dependencies
+                        # Automated deployment - install only production dependencies
                         cd ${APP_DIR}
                         echo "Installing production dependencies..."
                         
+                        # Since app is already built, we only need production dependencies
                         if sudo -n -u naidizakupku npm ci --only=production 2>/dev/null; then
-                            echo "✓ Dependencies installed as naidizakupku user"
+                            echo "✓ Production dependencies installed as naidizakupku user"
+                            INSTALL_USER="naidizakupku"
                         elif npm ci --only=production 2>/dev/null; then
-                            echo "✓ Dependencies installed as current user"
+                            echo "✓ Production dependencies installed as current user"
+                            INSTALL_USER="current"
                         else
                             echo "Trying npm install instead of npm ci..."
                             if sudo -n -u naidizakupku npm install --only=production 2>/dev/null; then
-                                echo "✓ Dependencies installed as naidizakupku user with npm install"
+                                echo "✓ Production dependencies installed as naidizakupku user with npm install"
+                                INSTALL_USER="naidizakupku"
                             elif npm install --only=production 2>/dev/null; then
-                                echo "✓ Dependencies installed as current user with npm install"
+                                echo "✓ Production dependencies installed as current user with npm install"
+                                INSTALL_USER="current"
                             else
-                                echo "❌ ERROR: Could not install dependencies"
+                                echo "❌ ERROR: Could not install production dependencies"
                                 echo "Manual installation required:"
                                 echo "  cd ${APP_DIR} && npm ci --only=production"
+                                exit 1
+                            fi
+                        fi
+                        
+                        # Ensure .next directory exists and has correct permissions
+                        echo "Ensuring .next directory is properly set up..."
+                        if [ "$INSTALL_USER" = "naidizakupku" ]; then
+                            sudo -n -u naidizakupku ls -la .next/ || echo "No .next directory found"
+                            if [ ! -d ".next" ]; then
+                                echo "❌ .next directory missing - this should have been copied from build stage"
+                                echo "Manual build required: npm run build"
+                                exit 1
+                            fi
+                        else
+                            ls -la .next/ || echo "No .next directory found"
+                            if [ ! -d ".next" ]; then
+                                echo "❌ .next directory missing - this should have been copied from build stage"
+                                echo "Manual build required: npm run build"
                                 exit 1
                             fi
                         fi
