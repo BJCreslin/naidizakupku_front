@@ -16,14 +16,13 @@ pipeline {
             }
         }
         
-        stage('Setup Node.js and Install Dependencies') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
-                    # Ensure Node.js 18 is available
-                    if ! command -v node &> /dev/null || [[ $(node --version) != v18* ]]; then
-                        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-                        sudo apt-get install -y nodejs
-                    fi
+                    # Check current Node.js version
+                    echo "Current Node.js version:"
+                    node --version
+                    npm --version
                     
                     # Install dependencies
                     npm ci
