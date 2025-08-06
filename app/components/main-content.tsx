@@ -1,5 +1,9 @@
-import { TrendingUp, Calendar, MapPin, Briefcase } from 'lucide-react'
+'use client'
+
+import { TrendingUp, Calendar, MapPin, Briefcase, Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import { useProjectInfo } from '@/hooks/use-project-info'
+import { formatNumber, formatBudget } from '@/utils/format'
 
 interface ProcurementItem {
   id: string
@@ -12,6 +16,9 @@ interface ProcurementItem {
 }
 
 export function MainContent() {
+  // Получаем данные о проекте из API
+  const { projectInfo, isLoading, error } = useProjectInfo()
+
   // Мокап данных для демонстрации
   const procurements: ProcurementItem[] = [
     {
@@ -87,6 +94,10 @@ export function MainContent() {
     }
   }
 
+  const handleStartSearch = () => {
+    window.open('https://zakupki.gov.ru/epz/order/extendedsearch/results.html', '_blank')
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Hero Section */}
@@ -100,7 +111,10 @@ export function MainContent() {
             Отслеживайте тендеры, участвуйте в конкурсах и развивайте свой бизнес.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+            <button 
+              onClick={handleStartSearch}
+              className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+            >
               Начать поиск
             </button>
             <button className="border border-border px-6 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
@@ -116,15 +130,39 @@ export function MainContent() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="bg-white border border-border rounded-lg p-6 text-center">
-          <div className="text-2xl font-bold text-primary mb-2">2,450+</div>
+          <div className="text-2xl font-bold text-primary mb-2 min-h-[2rem] flex items-center justify-center">
+            {isLoading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : error ? (
+              <span className="text-red-500 text-base">Ошибка</span>
+            ) : (
+              `${formatNumber(projectInfo?.procurementsCount || 0)}+`
+            )}
+          </div>
           <div className="text-sm text-muted-foreground">Активных закупок</div>
         </div>
         <div className="bg-white border border-border rounded-lg p-6 text-center">
-          <div className="text-2xl font-bold text-primary mb-2">890+</div>
+          <div className="text-2xl font-bold text-primary mb-2 min-h-[2rem] flex items-center justify-center">
+            {isLoading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : error ? (
+              <span className="text-red-500 text-base">Ошибка</span>
+            ) : (
+              `${formatNumber(projectInfo?.membersCount || 0)}+`
+            )}
+          </div>
           <div className="text-sm text-muted-foreground">Участников</div>
         </div>
         <div className="bg-white border border-border rounded-lg p-6 text-center">
-          <div className="text-2xl font-bold text-primary mb-2">156M ₽</div>
+          <div className="text-2xl font-bold text-primary mb-2 min-h-[2rem] flex items-center justify-center">
+            {isLoading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : error ? (
+              <span className="text-red-500 text-base">Ошибка</span>
+            ) : (
+              formatBudget(projectInfo?.budgetAmount || 0)
+            )}
+          </div>
           <div className="text-sm text-muted-foreground">Общий бюджет</div>
         </div>
       </div>
