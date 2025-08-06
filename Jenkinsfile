@@ -10,12 +10,6 @@ pipeline {
 
     
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'master', url: 'https://github.com/bjcreslin/naidizakupku_front.git'
-            }
-        }
-        
         stage('Install Dependencies') {
             steps {
                 sh '''
@@ -24,8 +18,18 @@ pipeline {
                     node --version
                     npm --version
                     
-                    # Install dependencies
-                    npm ci
+                    # List files to verify package-lock.json exists
+                    echo "Files in current directory:"
+                    ls -la
+                    
+                    # Check if package-lock.json exists
+                    if [ -f "package-lock.json" ]; then
+                        echo "package-lock.json found, using npm ci"
+                        npm ci
+                    else
+                        echo "package-lock.json not found, using npm install"
+                        npm install
+                    fi
                 '''
             }
         }
