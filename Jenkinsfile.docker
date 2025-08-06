@@ -1,13 +1,16 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:18-alpine'
+            args '-u root:root'
+        }
+    }
     
     environment {
         NODE_VERSION = '18'
         APP_DIR = '/var/www/naidizakupku'
         PM2_APP_NAME = 'naidizakupku-front'
     }
-    
-
     
     stages {
         stage('Checkout') {
@@ -16,18 +19,9 @@ pipeline {
             }
         }
         
-        stage('Setup Node.js and Install Dependencies') {
+        stage('Install Dependencies') {
             steps {
-                sh '''
-                    # Ensure Node.js 18 is available
-                    if ! command -v node &> /dev/null || [[ $(node --version) != v18* ]]; then
-                        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-                        sudo apt-get install -y nodejs
-                    fi
-                    
-                    # Install dependencies
-                    npm ci
-                '''
+                sh 'npm ci'
             }
         }
         
@@ -50,6 +44,7 @@ pipeline {
         }
         
         stage('Deploy') {
+            agent any // Switch back to host agent for deployment
             steps {
                 script {
                     // Останавливаем приложение
