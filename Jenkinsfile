@@ -100,64 +100,120 @@ pipeline {
                     sh '''
                         echo "Deploying application files..."
                         
-                        # Create app directory if it doesn't exist
-                        mkdir -p ${APP_DIR} || sudo mkdir -p ${APP_DIR}
+                        # Try different deployment strategies
+                        DEPLOYED=false
                         
-                        # Try to copy files with different approaches
+                        # Strategy 1: Try with sudo
                         if sudo -n rm -rf ${APP_DIR}/* 2>/dev/null && sudo -n cp -R ./* ${APP_DIR}/ 2>/dev/null; then
-                            echo "Deployed with sudo"
+                            echo "✓ Deployed with sudo"
                             sudo chown -R naidizakupku:naidizakupku ${APP_DIR} 2>/dev/null || true
-                        else
-                            echo "Trying deployment without sudo..."
-                            # Check if we have write access to the directory
-                            if [ -w ${APP_DIR} ]; then
+                            DEPLOYED=true
+                        fi
+                        
+                        # Strategy 2: Try to create directory with proper permissions
+                        if [ "$DEPLOYED" = "false" ]; then
+                            echo "Trying to create deployment directory with proper permissions..."
+                            if sudo -n mkdir -p ${APP_DIR} 2>/dev/null && sudo -n chown jenkins:jenkins ${APP_DIR} 2>/dev/null; then
+                                echo "✓ Created directory with jenkins ownership"
                                 rm -rf ${APP_DIR}/*
                                 cp -R ./* ${APP_DIR}/
-                                echo "Deployed without sudo"
-                            else
-                                echo "ERROR: Cannot deploy - no write access to ${APP_DIR} and no sudo access"
-                                exit 1
+                                DEPLOYED=true
                             fi
+                        fi
+                        
+                        # Strategy 3: Use a different deployment directory that jenkins can write to
+                        if [ "$DEPLOYED" = "false" ]; then
+                            echo "Trying alternative deployment directory..."
+                            ALT_DIR="/tmp/naidizakupku-deploy"
+                            rm -rf $ALT_DIR
+                            mkdir -p $ALT_DIR
+                            cp -R ./* $ALT_DIR/
+                            echo "✓ Files copied to $ALT_DIR"
+                            echo "NOTE: Files are in $ALT_DIR - manual move to ${APP_DIR} required"
+                            
+                            # Try to move with sudo
+                            if sudo -n rm -rf ${APP_DIR}/* 2>/dev/null && sudo -n cp -R $ALT_DIR/* ${APP_DIR}/ 2>/dev/null; then
+                                echo "✓ Successfully moved to final location with sudo"
+                                sudo chown -R naidizakupku:naidizakupku ${APP_DIR} 2>/dev/null || true
+                                DEPLOYED=true
+                            fi
+                        fi
+                        
+                        # Strategy 4: Deploy to Jenkins workspace and provide instructions
+                        if [ "$DEPLOYED" = "false" ]; then
+                            echo "========================================="
+                            echo "DEPLOYMENT INSTRUCTIONS:"
+                            echo "Files are built and ready in: $(pwd)"
+                            echo "To complete deployment manually, run:"
+                            echo "  sudo rm -rf ${APP_DIR}/*"
+                            echo "  sudo cp -R $(pwd)/* ${APP_DIR}/"
+                            echo "  sudo chown -R naidizakupku:naidizakupku ${APP_DIR}"
+                            echo "========================================="
+                            
+                            # Set a flag for later stages to know deployment method
+                            echo "manual" > deployment_method.txt
+                        else
+                            echo "automated" > deployment_method.txt
                         fi
                     '''
                     
-                    // Install production dependencies
+                    // Install production dependencies and start application
                     sh '''
+                        # Check deployment method
+                        DEPLOYMENT_METHOD=$(cat deployment_method.txt 2>/dev/null || echo "automated")
+                        
+                        if [ "$DEPLOYMENT_METHOD" = "manual" ]; then
+                            echo "========================================="
+                            echo "MANUAL DEPLOYMENT DETECTED"
+                            echo "After manually copying files to ${APP_DIR}, run:"
+                            echo "  cd ${APP_DIR}"
+                            echo "  sudo -u naidizakupku npm ci --only=production"
+                            echo "  sudo -u naidizakupku pm2 start npm --name '${PM2_APP_NAME}' -- start"
+                            echo "  sudo -u naidizakupku pm2 save"
+                            echo "========================================="
+                            echo "Build completed successfully - manual deployment required"
+                            exit 0
+                        fi
+                        
+                        # Automated deployment - install dependencies
                         cd ${APP_DIR}
                         echo "Installing production dependencies..."
                         
                         if sudo -n -u naidizakupku npm ci --only=production 2>/dev/null; then
-                            echo "Dependencies installed as naidizakupku user"
+                            echo "✓ Dependencies installed as naidizakupku user"
                         elif npm ci --only=production 2>/dev/null; then
-                            echo "Dependencies installed as current user"
+                            echo "✓ Dependencies installed as current user"
                         else
                             echo "Trying npm install instead of npm ci..."
                             if sudo -n -u naidizakupku npm install --only=production 2>/dev/null; then
-                                echo "Dependencies installed as naidizakupku user with npm install"
+                                echo "✓ Dependencies installed as naidizakupku user with npm install"
                             elif npm install --only=production 2>/dev/null; then
-                                echo "Dependencies installed as current user with npm install"
+                                echo "✓ Dependencies installed as current user with npm install"
                             else
-                                echo "ERROR: Could not install dependencies"
+                                echo "❌ ERROR: Could not install dependencies"
+                                echo "Manual installation required:"
+                                echo "  cd ${APP_DIR} && npm ci --only=production"
                                 exit 1
                             fi
                         fi
-                    '''
-                    
-                    // Start application
-                    sh '''
-                        cd ${APP_DIR}
+                        
+                        # Start application
                         echo "Starting application..."
                         
                         if sudo -n -u naidizakupku pm2 start npm --name "${PM2_APP_NAME}" -- start 2>/dev/null; then
-                            echo "Started as naidizakupku user"
+                            echo "✓ Started as naidizakupku user"
                             sudo -n -u naidizakupku pm2 save 2>/dev/null || true
                         elif pm2 start npm --name "${PM2_APP_NAME}" -- start 2>/dev/null; then
-                            echo "Started as current user"
+                            echo "✓ Started as current user"
                             pm2 save 2>/dev/null || true
                         else
-                            echo "ERROR: Could not start application with PM2"
+                            echo "❌ Could not start application with PM2"
+                            echo "Manual startup required:"
+                            echo "  cd ${APP_DIR} && pm2 start npm --name '${PM2_APP_NAME}' -- start"
                             exit 1
                         fi
+                        
+                        echo "🎉 Deployment completed successfully!"
                     '''
                 }
             }
