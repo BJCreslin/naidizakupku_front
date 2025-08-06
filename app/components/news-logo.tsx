@@ -12,7 +12,7 @@ export function NewsLogo({ size = 32, className = "" }: NewsLogoProps) {
       className={className}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Фон */}
+      {/* Фон   */}
       <rect width="48" height="48" rx="8" fill="#1e40af" />
       
       {/* Документ */}
