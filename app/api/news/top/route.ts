@@ -1,28 +1,35 @@
 import { NextResponse } from 'next/server'
 import type { News, NewsResponse } from '@/types/news'
 import { NewsType } from '@/types/news'
-import { API_URLS, API_CONFIG } from '@/config/api'
+import { API_URLS, API_CONFIG, buildApiUrl } from '@/config/api'
 import { ApiHelpers } from '@/utils/api-helpers'
 
 export async function GET() {
   try {
     console.log('Fetching news from backend...')
     
-    // Используем утилиту для API запросов
-    const apiResponse = await ApiHelpers.get<News[]>(
-      API_CONFIG.ENDPOINTS.NEWS.TOP,
-      ApiHelpers.getCacheOptions()
-    )
+    // Используем правильный URL к backend API
+    const backendUrl = buildApiUrl('/news/top')
+    console.log('Fetching from:', backendUrl)
+    console.log('Full URL:', backendUrl)
+    console.log('Expected URL: https://naidizakupku.ru/api/backend/news/top')
+    
+    const apiResponse = await fetch(backendUrl, {
+      method: 'GET',
+      headers: API_CONFIG.DEFAULT_HEADERS,
+      ...ApiHelpers.getCacheOptions()
+    })
 
-    if (!apiResponse.success) {
-      throw new Error(apiResponse.error || 'Failed to fetch news')
+    if (!apiResponse.ok) {
+      throw new Error(`HTTP ${apiResponse.status}: ${await apiResponse.text()}`)
     }
 
-    console.log('Backend data received:', apiResponse.data.length, 'items')
+    const data: News[] = await apiResponse.json()
+    console.log('Backend data received:', data.length, 'items')
     
     const response: NewsResponse = {
-      data: apiResponse.data,
-      total: apiResponse.data.length
+      data: data,
+      total: data.length
     }
 
     return NextResponse.json(response)

@@ -55,6 +55,12 @@ export const buildApiUrl = (endpoint: string, useHttps = true): string => {
   return `${baseUrl}${API_CONFIG.BACKEND_PATH}${endpoint}`
 }
 
+// Функция для построения URL без /backend
+export const buildDirectApiUrl = (endpoint: string, useHttps = true): string => {
+  const baseUrl = useHttps ? API_CONFIG.BASE_URL : API_CONFIG.BASE_URL_HTTP
+  return `${baseUrl}${API_CONFIG.API_PATH}${endpoint}`
+}
+
 export const buildNewsUrl = (endpoint: string): string => {
   return buildApiUrl(API_CONFIG.ENDPOINTS.NEWS[endpoint as keyof typeof API_CONFIG.ENDPOINTS.NEWS])
 }
@@ -67,6 +73,7 @@ export const buildAdminUrl = (endpoint: string): string => {
 export const API_URLS = {
   NEWS: {
     TOP: buildApiUrl(API_CONFIG.ENDPOINTS.NEWS.TOP),
+    TOP_DIRECT: buildDirectApiUrl(API_CONFIG.ENDPOINTS.NEWS.TOP),
   },
   ADMIN: {
     COMMON_INFO: buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.COMMON.INFO),

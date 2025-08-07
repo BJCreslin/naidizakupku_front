@@ -59,6 +59,10 @@ const isHealthy = await ApiHelpers.checkHealth()
 - `API_PATH`: Базовый путь API (/api)
 - `BACKEND_PATH`: Путь к backend API (/api/backend)
 
+### URL Building Functions
+- `buildApiUrl()`: Строит URL с `/api/backend` префиксом
+- `buildDirectApiUrl()`: Строит URL с `/api` префиксом (для прямого доступа к backend)
+
 ### Endpoints
 Все endpoints организованы по категориям:
 - `NEWS`: Новости
