@@ -1,29 +1,25 @@
 import { NextResponse } from 'next/server'
 import type { ProjectInfoDto, ProjectInfoResponse } from '@/types/project'
+import { API_URLS, API_CONFIG } from '@/config/api'
+import { ApiHelpers } from '@/utils/api-helpers'
 
 export async function GET() {
   try {
-    // Запрос к реальному API сервера
-    const response = await fetch('http://naidizakupku.ru/api/admin/common/info', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // Добавляем таймаут на случай если сервер не отвечает
-      next: { revalidate: 300 } // кешируем на 5 минут
-    })
+    // Используем утилиту для API запросов
+    const apiResponse = await ApiHelpers.get<ProjectInfoDto>(
+      API_CONFIG.ENDPOINTS.ADMIN.COMMON.INFO,
+      ApiHelpers.getCacheOptions()
+    )
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    if (!apiResponse.success) {
+      throw new Error(apiResponse.error || 'Failed to fetch project info')
     }
 
-    const data: ProjectInfoDto = await response.json()
-
-    const apiResponse: ProjectInfoResponse = {
-      data: data
+    const response: ProjectInfoResponse = {
+      data: apiResponse.data
     }
 
-    return NextResponse.json(apiResponse)
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Error fetching project info from external API:', error)
     
