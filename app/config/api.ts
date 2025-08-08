@@ -66,7 +66,12 @@ export const buildNewsUrl = (endpoint: string): string => {
 }
 
 export const buildAdminUrl = (endpoint: string): string => {
-  return buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN[endpoint as keyof typeof API_CONFIG.ENDPOINTS.ADMIN])
+  // Handle nested admin endpoints by flattening the path
+  const endpointPath = endpoint.includes('.') 
+    ? endpoint.split('.').reduce((obj: any, key) => obj[key], API_CONFIG.ENDPOINTS.ADMIN)
+    : API_CONFIG.ENDPOINTS.ADMIN[endpoint as keyof typeof API_CONFIG.ENDPOINTS.ADMIN]
+  
+  return buildApiUrl(endpointPath as string)
 }
 
 // Готовые URL для часто используемых endpoints
@@ -76,7 +81,7 @@ export const API_URLS = {
     TOP_DIRECT: buildDirectApiUrl(API_CONFIG.ENDPOINTS.NEWS.TOP),
   },
   ADMIN: {
-    COMMON_INFO: buildApiUrl(API_CONFIG.ENDPOINTS.ADMIN.COMMON.INFO),
+    COMMON_INFO: buildApiUrl('/admin/common/info'),
   },
 } as const
 
