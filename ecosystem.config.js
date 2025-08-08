@@ -8,7 +8,10 @@ module.exports = {
     exec_mode: 'fork',
     env: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 3000,
+      // Прямой URL бэкенда (используется buildApiUrl)
+      // Если ваш бэкенд слушает на другом хосте/порту, поменяйте здесь
+      BACKEND_BASE_URL: 'http://localhost:9000/api'
     },
     error_file: '/var/log/naidizakupku/error.log',
     out_file: '/var/log/naidizakupku/out.log',

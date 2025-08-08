@@ -4,25 +4,44 @@ import { NewsType } from '@/types/news'
 import { API_URLS, API_CONFIG, buildApiUrl } from '@/config/api'
 import { ApiHelpers } from '@/utils/api-helpers'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     console.log('Fetching news from backend...')
     
-    // Используем правильный URL к backend API
-    const backendUrl = buildApiUrl('/news/top')
-    console.log('Fetching from:', backendUrl)
-    console.log('Full URL:', backendUrl)
-    console.log('Expected URL: https://naidizakupku.ru/api/backend/news/top')
-    
-    const apiResponse = await fetch(backendUrl, {
-      method: 'GET',
-      headers: API_CONFIG.DEFAULT_HEADERS,
-      ...ApiHelpers.getCacheOptions()
-    })
+    // Подготавливаем список кандидатов URL бэкенда (первый успешный используется)
+    const candidateUrls: string[] = []
+    const envBase = process.env.BACKEND_BASE_URL
+    if (envBase) candidateUrls.push(`${envBase}/news/top`)
+    // Локальный бэкенд по умолчанию (согласно nginx-* конфигу)
+    candidateUrls.push('http://127.0.0.1:9000/api/news/top')
+    // Публичный URL через nginx (на случай если прямой доступ недоступен)
+    candidateUrls.push(buildApiUrl('/news/top'))
 
-    if (!apiResponse.ok) {
-      throw new Error(`HTTP ${apiResponse.status}: ${await apiResponse.text()}`)
+    let apiResponse: Response | null = null
+    let lastError: unknown = null
+    for (const url of candidateUrls) {
+      try {
+        console.log('Trying backend URL:', url)
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: API_CONFIG.DEFAULT_HEADERS,
+          cache: 'no-store',
+        })
+        if (res.ok) {
+          apiResponse = res
+          break
+        }
+        lastError = new Error(`HTTP ${res.status}: ${await res.text()}`)
+      } catch (e) {
+        lastError = e
+      }
     }
+
+    if (!apiResponse) throw lastError || new Error('Failed to fetch news')
 
     const data: News[] = await apiResponse.json()
     console.log('Backend data received:', data.length, 'items')
