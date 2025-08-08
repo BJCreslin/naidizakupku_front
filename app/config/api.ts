@@ -51,6 +51,10 @@ export const API_CONFIG = {
 
 // Helper functions для построения полных URL
 export const buildApiUrl = (endpoint: string, useHttps = true): string => {
+  // Если задан прямой BASE URL для backend (например, http://localhost:9000/api), используем его
+  const directBackendBaseUrl = process.env.BACKEND_BASE_URL
+  if (directBackendBaseUrl) return `${directBackendBaseUrl}${endpoint}`
+
   const baseUrl = useHttps ? API_CONFIG.BASE_URL : API_CONFIG.BASE_URL_HTTP
   return `${baseUrl}${API_CONFIG.BACKEND_PATH}${endpoint}`
 }
