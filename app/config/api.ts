@@ -85,7 +85,7 @@ export const API_URLS = {
     TOP_DIRECT: buildDirectApiUrl(API_CONFIG.ENDPOINTS.NEWS.TOP),
   },
   ADMIN: {
-    COMMON_INFO: buildApiUrl('/admin/common/info'),
+    COMMON_INFO: 'https://naidizakupku.ru/backend/api/admin/common/info',
   },
 } as const
 

@@ -13,8 +13,8 @@ export async function GET() {
     if (envBase) candidateUrls.push(`${envBase}/admin/common/info`)
     // Локальный бэкенд по умолчанию (согласно nginx-* конфигу)
     candidateUrls.push('http://127.0.0.1:9000/api/admin/common/info')
-    // Публичный URL через nginx (на случай если прямой доступ недоступен)
-    candidateUrls.push(buildApiUrl('/admin/common/info'))
+    // Внешний бэкенд API (не через Next.js route)
+    candidateUrls.push('https://naidizakupku.ru/backend/api/admin/common/info')
 
     let apiResponse: Response | null = null
     let lastError: unknown = null
