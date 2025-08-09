@@ -37,13 +37,26 @@ export async function GET() {
     }
 
     if (apiResponse) {
-      const data: ProjectInfoDto = await apiResponse.json()
-      console.log('Backend project info received:', data)
+      const backendData = await apiResponse.json()
+      console.log('Backend project info received:', backendData)
       
-      const response: ProjectInfoResponse = {
-        data: data
+      // Если бэкенд уже вернул данные в правильном формате, используем их как есть
+      // Если нет - оборачиваем в наш формат
+      if (backendData && typeof backendData === 'object' && 'procurementsCount' in backendData) {
+        // Прямые данные от бэкенда
+        const response: ProjectInfoResponse = {
+          data: backendData as ProjectInfoDto
+        }
+        return NextResponse.json(response)
+      } else if (backendData && typeof backendData === 'object' && 'data' in backendData) {
+        // Данные уже обернуты - возвращаем как есть
+        return NextResponse.json(backendData)
       }
-
+      
+      // Fallback - оборачиваем сами
+      const response: ProjectInfoResponse = {
+        data: backendData as ProjectInfoDto
+      }
       return NextResponse.json(response)
     }
     
