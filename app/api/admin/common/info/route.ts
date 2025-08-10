@@ -7,7 +7,14 @@ import { ApiHelpers } from '@/utils/api-helpers'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Проверяем параметр для принудительного обновления кэша
+  const { searchParams } = new URL(request.url)
+  const forceRefresh = searchParams.get('refresh') === 'true'
+  
+  if (forceRefresh) {
+    console.log('Force refresh requested')
+  }
   try {
     console.log('Fetching project info from backend...')
     
