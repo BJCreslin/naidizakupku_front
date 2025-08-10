@@ -3,6 +3,10 @@ import type { ProjectInfoDto, ProjectInfoResponse } from '@/types/project'
 import { API_URLS, API_CONFIG, buildApiUrl } from '@/config/api'
 import { ApiHelpers } from '@/utils/api-helpers'
 
+// Отключаем кэширование для этого route
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     console.log('Fetching project info from backend...')
@@ -62,7 +66,11 @@ export async function GET() {
       const response: ProjectInfoResponse = {
         data: backendData as ProjectInfoDto
       }
-      return NextResponse.json(response)
+      const nextResponse = NextResponse.json(response)
+      nextResponse.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+      nextResponse.headers.set('Pragma', 'no-cache')
+      nextResponse.headers.set('Expires', '0')
+      return nextResponse
     }
     
     throw lastError || new Error('Failed to fetch project info')
@@ -87,6 +95,9 @@ export async function GET() {
     console.log('Returning fallback response:', JSON.stringify(fallbackResponse, null, 2))
     const response = NextResponse.json(fallbackResponse)
     response.headers.set('X-Debug-Info', 'fallback-data-no-external-calls')
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
     return response
   }
 } 
