@@ -13,8 +13,8 @@ export async function GET() {
     if (envBase) candidateUrls.push(`${envBase}/admin/common/info`)
     // Локальный бэкенд по умолчанию (согласно nginx-* конфигу)
     candidateUrls.push('http://127.0.0.1:9000/api/admin/common/info')
-    // Внешний бэкенд API (не через Next.js route)
-    candidateUrls.push('https://naidizakupku.ru/backend/api/admin/common/info')
+    // Внешний бэкенд API через nginx (правильный путь)
+    candidateUrls.push('https://naidizakupku.ru/api/backend/admin/common/info')
 
     let apiResponse: Response | null = null
     let lastError: unknown = null
@@ -26,19 +26,24 @@ export async function GET() {
           headers: API_CONFIG.DEFAULT_HEADERS,
           cache: 'no-store',
         })
+        console.log('Response status:', res.status, 'for URL:', url)
         if (res.ok) {
           apiResponse = res
+          console.log('Successfully got response from:', url)
           break
         }
-        lastError = new Error(`HTTP ${res.status}: ${await res.text()}`)
+        const errorText = await res.text()
+        console.log('Error response:', errorText)
+        lastError = new Error(`HTTP ${res.status}: ${errorText}`)
       } catch (e) {
+        console.log('Fetch error for URL:', url, 'Error:', e)
         lastError = e
       }
     }
 
     if (apiResponse) {
       const backendData = await apiResponse.json()
-      console.log('Backend project info received:', backendData)
+      console.log('Backend project info received:', JSON.stringify(backendData, null, 2))
       
       // Если бэкенд уже вернул данные в правильном формате, используем их как есть
       // Если нет - оборачиваем в наш формат
@@ -76,6 +81,7 @@ export async function GET() {
       data: fallbackData
     }
 
+    console.log('Returning fallback response:', JSON.stringify(fallbackResponse, null, 2))
     return NextResponse.json(fallbackResponse)
   }
 } 

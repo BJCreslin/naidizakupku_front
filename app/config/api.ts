@@ -6,7 +6,7 @@ export const API_CONFIG = {
   
   // API Paths
   API_PATH: '/api',
-  BACKEND_PATH: '/backend/api',
+  BACKEND_PATH: '/api/backend',
   
   // Endpoints
   ENDPOINTS: {
@@ -81,11 +81,11 @@ export const buildAdminUrl = (endpoint: string): string => {
 // Готовые URL для часто используемых endpoints
 export const API_URLS = {
   NEWS: {
-    TOP: 'https://naidizakupku.ru/backend/api/news/top',
+    TOP: 'https://naidizakupku.ru/api/backend/news/top',
     TOP_DIRECT: buildDirectApiUrl(API_CONFIG.ENDPOINTS.NEWS.TOP),
   },
   ADMIN: {
-    COMMON_INFO: 'https://naidizakupku.ru/backend/api/admin/common/info',
+    COMMON_INFO: 'https://naidizakupku.ru/api/backend/admin/common/info',
   },
 } as const
 
