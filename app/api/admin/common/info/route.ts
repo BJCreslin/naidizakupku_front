@@ -7,14 +7,14 @@ export async function GET() {
   try {
     console.log('Fetching project info from backend...')
     
-    // Подготавливаем список кандидатов URL бэкенда (первый успешный используется)
+    // ВРЕМЕННО: Отключаем ВСЕ внешние вызовы для отладки
     const candidateUrls: string[] = []
-    const envBase = process.env.BACKEND_BASE_URL
-    if (envBase) candidateUrls.push(`${envBase}/admin/common/info`)
-    // Локальный бэкенд по умолчанию (согласно nginx-* конфигу)
-    candidateUrls.push('http://127.0.0.1:9000/api/admin/common/info')
-    // Внешний бэкенд API через nginx (правильный путь)
-    candidateUrls.push('https://naidizakupku.ru/api/backend/admin/common/info')
+    // const envBase = process.env.BACKEND_BASE_URL
+    // if (envBase) candidateUrls.push(`${envBase}/admin/common/info`)
+    // // Локальный бэкенд по умолчанию (согласно nginx-* конфигу)
+    // candidateUrls.push('http://127.0.0.1:9000/api/admin/common/info')
+    // // Внешний бэкенд API через nginx (правильный путь)
+    // candidateUrls.push('https://naidizakupku.ru/api/backend/admin/common/info')
 
     let apiResponse: Response | null = null
     let lastError: unknown = null
@@ -81,7 +81,12 @@ export async function GET() {
       data: fallbackData
     }
 
+    // Добавляем timestamp для отладки
+    console.log('Fallback timestamp:', new Date().toISOString())
+
     console.log('Returning fallback response:', JSON.stringify(fallbackResponse, null, 2))
-    return NextResponse.json(fallbackResponse)
+    const response = NextResponse.json(fallbackResponse)
+    response.headers.set('X-Debug-Info', 'fallback-data-no-external-calls')
+    return response
   }
 } 
