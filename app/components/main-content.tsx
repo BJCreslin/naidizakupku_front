@@ -4,6 +4,7 @@ import { TrendingUp, Calendar, MapPin, Briefcase, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { useProjectInfo } from '@/hooks/use-project-info'
 import { formatNumber, formatBudget } from '@/utils/format'
+import { AuthStatus } from './auth-status'
 
 interface ProcurementItem {
   id: string
@@ -100,6 +101,9 @@ export function MainContent() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Auth Status */}
+      <AuthStatus />
+
       {/* Hero Section */}
       <div className="relative mb-12 rounded-2xl overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 p-8 md:p-12">
         <div className="relative z-10">

@@ -3,11 +3,15 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Menu, X, Search, Bell, User } from 'lucide-react'
+import { Menu, X, Search, Bell } from 'lucide-react'
+import { AuthButton } from './auth-button'
+import { UserMenu } from './user-menu'
+import { useAuthContext } from './auth-provider'
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { isAuthenticated } = useAuthContext()
 
   const isActive = (path: string) => pathname === path
 
@@ -65,10 +69,22 @@ export function Navigation() {
               >
                 Новости
               </Link>
+              {isAuthenticated && (
+                <a
+                  href="/profile"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive('/profile') 
+                      ? 'text-primary font-semibold' 
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
+                >
+                  Профиль
+                </a>
+              )}
             </div>
           </div>
 
-          {/* Right side icons */}
+          {/* Right side icons and auth */}
           <div className="hidden md:flex items-center space-x-4">
             <button className="text-muted-foreground hover:text-primary p-2 rounded-md transition-colors">
               <Search size={20} />
@@ -76,9 +92,13 @@ export function Navigation() {
             <button className="text-muted-foreground hover:text-primary p-2 rounded-md transition-colors">
               <Bell size={20} />
             </button>
-            <button className="text-muted-foreground hover:text-primary p-2 rounded-md transition-colors">
-              <User size={20} />
-            </button>
+            
+            {/* Auth components */}
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <AuthButton />
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -140,19 +160,40 @@ export function Navigation() {
               >
                 Новости
               </Link>
+              {isAuthenticated && (
+                <a
+                  href="/profile"
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    isActive('/profile') 
+                      ? 'text-primary bg-muted font-semibold' 
+                      : 'text-muted-foreground hover:bg-muted hover:text-primary'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Профиль
+                </a>
+              )}
             </div>
-            {/* Mobile icons */}
+            {/* Mobile icons and auth */}
             <div className="px-2 pt-2 pb-3 border-t border-border">
-              <div className="flex space-x-4">
-                <button className="text-muted-foreground hover:text-primary p-2 rounded-md transition-colors">
-                  <Search size={20} />
-                </button>
-                <button className="text-muted-foreground hover:text-primary p-2 rounded-md transition-colors">
-                  <Bell size={20} />
-                </button>
-                <button className="text-muted-foreground hover:text-primary p-2 rounded-md transition-colors">
-                  <User size={20} />
-                </button>
+              <div className="flex items-center justify-between">
+                <div className="flex space-x-4">
+                  <button className="text-muted-foreground hover:text-primary p-2 rounded-md transition-colors">
+                    <Search size={20} />
+                  </button>
+                  <button className="text-muted-foreground hover:text-primary p-2 rounded-md transition-colors">
+                    <Bell size={20} />
+                  </button>
+                </div>
+                
+                {/* Mobile auth */}
+                <div className="flex items-center">
+                  {isAuthenticated ? (
+                    <UserMenu />
+                  ) : (
+                    <AuthButton />
+                  )}
+                </div>
               </div>
             </div>
           </div>

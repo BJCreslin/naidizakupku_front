@@ -22,6 +22,17 @@ export const API_CONFIG = {
       },
     },
     
+    // Auth endpoints
+    AUTH: {
+      TELEGRAM: {
+        VALIDATE: '/auth/telegram/validate',
+        SESSION: '/auth/telegram/session',
+        LOGOUT: '/auth/telegram/logout',
+        LOGOUT_ALL: '/auth/telegram/logout/all',
+      },
+      VERIFY_TOKEN: '/v1/verify-token',
+    },
+    
     // User endpoints (для будущего использования)
     USER: {
       PROFILE: '/user/profile',
@@ -78,6 +89,15 @@ export const buildAdminUrl = (endpoint: string): string => {
   return buildApiUrl(endpointPath as string)
 }
 
+export const buildAuthUrl = (endpoint: string): string => {
+  // Handle nested auth endpoints by flattening the path
+  const endpointPath = endpoint.includes('.') 
+    ? endpoint.split('.').reduce((obj: any, key) => obj[key], API_CONFIG.ENDPOINTS.AUTH)
+    : API_CONFIG.ENDPOINTS.AUTH[endpoint as keyof typeof API_CONFIG.ENDPOINTS.AUTH]
+  
+  return buildDirectApiUrl(endpointPath as string)
+}
+
 // Готовые URL для часто используемых endpoints
 export const API_URLS = {
   NEWS: {
@@ -87,9 +107,17 @@ export const API_URLS = {
   ADMIN: {
     COMMON_INFO: 'https://naidizakupku.ru/api/backend/admin/common/info',
   },
+  AUTH: {
+    TELEGRAM_VALIDATE: buildAuthUrl('TELEGRAM.VALIDATE'),
+    TELEGRAM_SESSION: buildAuthUrl('TELEGRAM.SESSION'),
+    TELEGRAM_LOGOUT: buildAuthUrl('TELEGRAM.LOGOUT'),
+    TELEGRAM_LOGOUT_ALL: buildAuthUrl('TELEGRAM.LOGOUT_ALL'),
+    VERIFY_TOKEN: buildAuthUrl('VERIFY_TOKEN'),
+  },
 } as const
 
 // Типы для TypeScript
 export type ApiEndpoint = keyof typeof API_CONFIG.ENDPOINTS
 export type NewsEndpoint = keyof typeof API_CONFIG.ENDPOINTS.NEWS
 export type AdminEndpoint = keyof typeof API_CONFIG.ENDPOINTS.ADMIN
+export type AuthEndpoint = keyof typeof API_CONFIG.ENDPOINTS.AUTH
