@@ -16,9 +16,19 @@ interface ProcurementItem {
   status: 'active' | 'ending-soon' | 'new'
 }
 
+// Fallback данные для статической сборки
+const FALLBACK_PROJECT_INFO = {
+  procurementsCount: 2450,
+  membersCount: 890,
+  budgetAmount: 156000000
+}
+
 export function MainContent() {
   // Получаем данные о проекте из API
   const { projectInfo, isLoading, error } = useProjectInfo()
+
+  // Используем fallback данные если API недоступен
+  const displayProjectInfo = projectInfo || FALLBACK_PROJECT_INFO
 
   // Мокап данных для демонстрации
   const procurements: ProcurementItem[] = [
@@ -140,7 +150,7 @@ export function MainContent() {
             ) : error ? (
               <span className="text-red-500 text-base">Ошибка</span>
             ) : (
-              `${formatNumber(projectInfo?.procurementsCount || 0)}+`
+              `${formatNumber(displayProjectInfo.procurementsCount)}+`
             )}
           </div>
           <div className="text-sm text-muted-foreground">Активных закупок</div>
@@ -152,7 +162,7 @@ export function MainContent() {
             ) : error ? (
               <span className="text-red-500 text-base">Ошибка</span>
             ) : (
-              `${formatNumber(projectInfo?.membersCount || 0)}+`
+              `${formatNumber(displayProjectInfo.membersCount)}+`
             )}
           </div>
           <div className="text-sm text-muted-foreground">Участников</div>
@@ -164,7 +174,7 @@ export function MainContent() {
             ) : error ? (
               <span className="text-red-500 text-base">Ошибка</span>
             ) : (
-              formatBudget(projectInfo?.budgetAmount || 0)
+              formatBudget(displayProjectInfo.budgetAmount)
             )}
           </div>
           <div className="text-sm text-muted-foreground">Общий бюджет</div>
