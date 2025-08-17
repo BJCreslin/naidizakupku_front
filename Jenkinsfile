@@ -76,16 +76,11 @@ pipeline {
                         sudo -u naidizakupku pm2 stop ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to stop (naidizakupku)"
                         sudo -u naidizakupku pm2 delete ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to delete (naidizakupku)"
                         
-                        # Clean and copy files
-                        sudo rm -rf ${APP_DIR}/*
-                        cp -R ./* ${APP_DIR}/
+                        # Copy files using rsync (preserves permissions)
+                        echo "📁 Copying application files..."
+                        rsync -av --exclude='node_modules' --exclude='.git' ./ ${APP_DIR}/
                         
-                        # Ensure .next directory is copied (it might be hidden)
-                        if [ -d ".next" ]; then
-                            echo "📁 Copying .next directory..."
-                            cp -R .next ${APP_DIR}/
-                        fi
-                        
+                        # Set ownership after all files are copied
                         sudo chown -R naidizakupku:naidizakupku ${APP_DIR}
                         
                         echo "✓ Files deployed successfully"
