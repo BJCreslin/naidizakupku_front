@@ -4,7 +4,7 @@ import { API_URLS } from '@/config/api'
 export async function GET(request: NextRequest) {
   try {
     // Получаем информацию о боте с бэкенда
-    const response = await fetch(`${API_URLS.AUTH.TELEGRAM_BOT_INFO}`, {
+    const response = await fetch(`${API_URLS.AUTH_TELEGRAM_BOT_INFO}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

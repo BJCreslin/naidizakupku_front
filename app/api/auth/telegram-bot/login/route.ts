@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Отправляем код на бэкенд для валидации
-    const response = await fetch(`${API_URLS.AUTH.TELEGRAM_BOT_LOGIN}`, {
+    const response = await fetch(`${API_URLS.AUTH_TELEGRAM_BOT_LOGIN}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

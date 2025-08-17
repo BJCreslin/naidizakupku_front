@@ -64,7 +64,7 @@ export function useAuth(): UseAuthReturn {
 
       // Затем проверяем сессию
       if (sessionId) {
-        const response = await fetch(`${API_URLS.AUTH.TELEGRAM_SESSION}/${sessionId}`, {
+        const response = await fetch(`${API_URLS.AUTH_TELEGRAM_SESSION}/${sessionId}`, {
           method: 'GET',
           headers: getAuthHeaders(),
         })
@@ -102,7 +102,7 @@ export function useAuth(): UseAuthReturn {
       const token = getStoredToken()
       if (!token) return false
 
-      const response = await fetch(API_URLS.AUTH.VERIFY_TOKEN, {
+      const response = await fetch(API_URLS.AUTH_VERIFY_TOKEN, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -163,7 +163,7 @@ export function useAuth(): UseAuthReturn {
       }
 
       // Отправляем данные на сервер для валидации
-      const response = await fetch(API_URLS.AUTH.TELEGRAM_VALIDATE, {
+      const response = await fetch(API_URLS.AUTH_TELEGRAM_VALIDATE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -206,7 +206,7 @@ export function useAuth(): UseAuthReturn {
       setIsLoading(true)
       
       // Отправляем код на сервер для валидации
-      const response = await fetch(API_URLS.AUTH.TELEGRAM_BOT_LOGIN, {
+      const response = await fetch(API_URLS.AUTH_TELEGRAM_BOT_LOGIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +249,7 @@ export function useAuth(): UseAuthReturn {
       const sessionId = getStoredSessionId()
       
       if (sessionId) {
-        await fetch(`${API_URLS.AUTH.TELEGRAM_LOGOUT}?sessionId=${sessionId}`, {
+        await fetch(`${API_URLS.AUTH_TELEGRAM_LOGOUT}?sessionId=${sessionId}`, {
           method: 'DELETE',
           headers: getAuthHeaders(),
         })
@@ -269,7 +269,7 @@ export function useAuth(): UseAuthReturn {
       const userData = getStoredUserData()
       
       if (userData?.telegramId) {
-        await fetch(`${API_URLS.AUTH.TELEGRAM_LOGOUT_ALL}?telegramId=${userData.telegramId}`, {
+        await fetch(`${API_URLS.AUTH_TELEGRAM_LOGOUT_ALL}?telegramId=${userData.telegramId}`, {
           method: 'DELETE',
           headers: getAuthHeaders(),
         })

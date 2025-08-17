@@ -4,7 +4,7 @@ import { BACKEND_URLS, buildBackendUrl, buildDirectApiUrl, READY_URLS } from './
 export const API_CONFIG = {
   // Base URLs (перенаправляем на централизованную конфигурацию)
   get BASE_URL() { return BACKEND_URLS.DOMAINS.PRODUCTION },
-  get BASE_URL_HTTP() { return BACKEND_URLS.DOMAINS.PRODUCTION_HTTP },
+  get BASE_URL_HTTP() { return BACKEND_URLS.DOMAINS.PRODUCTION },
   
   // API Paths
   get API_PATH() { return BACKEND_URLS.API_PATHS.MAIN },

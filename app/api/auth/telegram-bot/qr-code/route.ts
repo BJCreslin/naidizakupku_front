@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Генерируем QR код на бэкенде
-    const response = await fetch(`${API_URLS.AUTH.TELEGRAM_BOT_QR_CODE}`, {
+    const response = await fetch(`${API_URLS.AUTH_TELEGRAM_BOT_QR_CODE}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

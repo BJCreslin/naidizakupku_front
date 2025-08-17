@@ -81,8 +81,30 @@
 
 ## Следующие шаги
 
-1. Постепенно мигрировать остальные файлы на новую систему
-2. Добавить новые URL по мере необходимости
-3. Обновить тесты для использования новой конфигурации
-4. Добавить валидацию URL в runtime
-5. При необходимости настроить SSL сертификаты для localhost (опционально)
+1. ✅ Постепенно мигрировать остальные файлы на новую систему
+2. ✅ Добавить новые URL по мере необходимости
+3. ✅ Обновить тесты для использования новой конфигурации
+4. ✅ Добавить валидацию URL в runtime
+5. ✅ При необходимости настроить SSL сертификаты для localhost (опционально)
+
+## Исправления после удаления дубликата
+
+После удаления дубликата `PRODUCTION_HTTP` были исправлены следующие ошибки TypeScript:
+
+### 1. Исправлен `app/config/api.ts`
+- Заменена ссылка на несуществующий `PRODUCTION_HTTP` на `PRODUCTION`
+
+### 2. Исправлены API routes
+- `app/api/auth/telegram-bot/info/route.ts` - `API_URLS.AUTH_TELEGRAM_BOT_INFO`
+- `app/api/auth/telegram-bot/login/route.ts` - `API_URLS.AUTH_TELEGRAM_BOT_LOGIN`
+- `app/api/auth/telegram-bot/qr-code/route.ts` - `API_URLS.AUTH_TELEGRAM_BOT_QR_CODE`
+
+### 3. Исправлен `app/hooks/use-auth.ts`
+- `API_URLS.AUTH_TELEGRAM_SESSION`
+- `API_URLS.AUTH_VERIFY_TOKEN`
+- `API_URLS.AUTH_TELEGRAM_VALIDATE`
+- `API_URLS.AUTH_TELEGRAM_BOT_LOGIN`
+- `API_URLS.AUTH_TELEGRAM_LOGOUT`
+- `API_URLS.AUTH_TELEGRAM_LOGOUT_ALL`
+
+**Все ошибки TypeScript исправлены ✅**
