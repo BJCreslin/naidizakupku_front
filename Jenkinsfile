@@ -6,9 +6,12 @@ pipeline {
         APP_DIR = '/var/www/naidizakupku'
         PM2_APP_NAME = 'naidizakupku-front'
     }
+
+        triggers {
+            githubPush()
+        }
     
 
-    
     stages {
         stage('Install Dependencies') {
             steps {
