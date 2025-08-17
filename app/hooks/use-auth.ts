@@ -259,7 +259,7 @@ export function useAuth(): UseAuthReturn {
     }
 
     initAuth()
-  }, [login, checkSession])
+  }, [login, checkSession, verifyToken])
 
   return {
     user,

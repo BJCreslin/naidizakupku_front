@@ -47,7 +47,7 @@ export function AuthStatus() {
               Приложение запущено в Telegram
             </span>
             <div className="text-yellow-700 text-sm">
-              Нажмите "Войти через Telegram" для авторизации
+              Нажмите &ldquo;Войти через Telegram&rdquo; для авторизации
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useAuthContext } from './auth-provider'
 import { User, Calendar, Shield, Settings, Edit } from 'lucide-react'
 
@@ -31,9 +32,11 @@ export function UserProfile({ className = '', showActions = true }: UserProfileP
       <div className="flex items-center gap-4 mb-6">
         <div className="relative">
           {user.photoUrl ? (
-            <img 
+            <Image 
               src={user.photoUrl} 
               alt={user.firstName}
+              width={64}
+              height={64}
               className="w-16 h-16 rounded-full object-cover"
             />
           ) : (

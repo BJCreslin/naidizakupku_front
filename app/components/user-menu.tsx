@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { ChevronDown, User, Settings, LogOut, Shield, Loader2 } from 'lucide-react'
 import { useAuthContext } from './auth-provider'
 
@@ -61,9 +62,11 @@ export function UserMenu({ className = '' }: UserMenuProps) {
       >
         <div className="flex items-center gap-2">
           {user.photoUrl ? (
-            <img 
+            <Image 
               src={user.photoUrl} 
               alt={user.firstName}
+              width={24}
+              height={24}
               className="w-6 h-6 rounded-full"
             />
           ) : (
@@ -79,9 +82,11 @@ export function UserMenu({ className = '' }: UserMenuProps) {
           <div className="p-4 border-b border-border">
             <div className="flex items-center gap-3">
               {user.photoUrl ? (
-                <img 
+                <Image 
                   src={user.photoUrl} 
                   alt={user.firstName}
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-full"
                 />
               ) : (
