@@ -76,9 +76,9 @@ pipeline {
                         sudo -u naidizakupku pm2 stop ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to stop (naidizakupku)"
                         sudo -u naidizakupku pm2 delete ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to delete (naidizakupku)"
                         
-                        # Copy files using rsync (preserves permissions)
+                        # Copy files using tar (exclude .next and node_modules)
                         echo "📁 Copying application files..."
-                        rsync -av --exclude='node_modules' --exclude='.git' ./ ${APP_DIR}/
+                        tar --exclude='node_modules' --exclude='.git' --exclude='.next' -czf - . | tar -xzf - -C ${APP_DIR}/
                         
                         # Set ownership after all files are copied
                         sudo chown -R naidizakupku:naidizakupku ${APP_DIR}
@@ -93,7 +93,7 @@ pipeline {
                         echo "📦 Installing all dependencies..."
                         sudo -u naidizakupku npm ci
                         
-                        echo "🔍 Rebuilding application on server..."
+                        echo "🔍 Building application on server (no .next copied)..."
                         sudo -u naidizakupku npm run build
                         
                         echo "🚀 Starting application..."
