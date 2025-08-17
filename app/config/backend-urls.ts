@@ -11,7 +11,7 @@ export const BACKEND_URLS = {
   // API пути
   API_PATHS: {
     MAIN: '/api',
-    BACKEND: '/api/backend',
+    BACKEND: '/api/backend/api',
   },
 
   // Полные URL для бэкенда

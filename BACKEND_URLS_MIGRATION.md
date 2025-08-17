@@ -108,3 +108,19 @@
 - `API_URLS.AUTH_TELEGRAM_LOGOUT_ALL`
 
 **Все ошибки TypeScript исправлены ✅**
+
+## Исправление URL для Telegram Bot API
+
+### Проблема:
+- Next.js API route обращался к неправильному URL
+- Ожидаемый: `https://naidizakupku.ru/api/backend/api/auth/telegram-bot/info`
+- Фактический: `https://naidizakupku.ru/api/backend/auth/telegram-bot/info`
+
+### Решение:
+- Исправлен `API_PATHS.BACKEND` с `/api/backend` на `/api/backend/api`
+- Теперь все backend URL строятся правильно
+
+### Проверка:
+- ✅ URL строится корректно: `https://naidizakupku.ru/api/backend/api/auth/telegram-bot/info`
+- ✅ TypeScript проверка проходит
+- ✅ API endpoint работает: [https://naidizakupku.ru/api/backend/api/auth/telegram-bot/info](https://naidizakupku.ru/api/backend/api/auth/telegram-bot/info)
