@@ -76,6 +76,10 @@ pipeline {
                         sudo -u naidizakupku pm2 stop ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to stop (naidizakupku)"
                         sudo -u naidizakupku pm2 delete ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to delete (naidizakupku)"
                         
+                        # Clean directory before copying
+                        echo "🧹 Cleaning target directory..."
+                        sudo rm -rf ${APP_DIR}/*
+                        
                         # Copy files using tar (exclude .next and node_modules)
                         echo "📁 Copying application files..."
                         tar --exclude='node_modules' --exclude='.git' --exclude='.next' -czf - . | tar -xzf - -C ${APP_DIR}/
