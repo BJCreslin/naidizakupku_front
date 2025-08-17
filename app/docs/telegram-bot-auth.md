@@ -8,7 +8,7 @@
 
 ### 1. Получение информации о боте
 
-**GET** `/api/auth/telegram-bot/info`
+**GET** `/api/backend/auth/telegram-bot/info`
 
 Возвращает информацию о Telegram боте для авторизации.
 
@@ -26,7 +26,7 @@
 **Kotlin Controller:**
 ```kotlin
 @RestController
-@RequestMapping("/api/auth/telegram-bot")
+@RequestMapping("/api/backend/auth/telegram-bot")
 class TelegramBotAuthController(
     private val telegramBotService: TelegramBotService
 ) {
@@ -44,7 +44,7 @@ class TelegramBotAuthController(
 
 ### 2. Генерация QR кода
 
-**POST** `/api/auth/telegram-bot/qr-code`
+**POST** `/api/backend/auth/telegram-bot/qr-code`
 
 Генерирует QR код для быстрого перехода к боту.
 
@@ -77,7 +77,7 @@ fun generateQrCode(@RequestBody request: QrCodeRequest): ResponseEntity<QrCodeRe
 
 ### 3. Авторизация по коду
 
-**POST** `/api/auth/telegram-bot/login`
+**POST** `/api/backend/auth/telegram-bot/login`
 
 Проверяет код от бота и возвращает JWT токен при успешной авторизации.
 

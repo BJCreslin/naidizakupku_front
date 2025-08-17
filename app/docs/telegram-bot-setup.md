@@ -277,15 +277,15 @@ class SecurityConfig {
 
 ```bash
 # Проверка работы бота
-curl -X GET "http://localhost:8080/api/auth/telegram-bot/info"
+curl -X GET "http://localhost:8080/api/backend/auth/telegram-bot/info"
 
 # Генерация QR кода
-curl -X POST "http://localhost:8080/api/auth/telegram-bot/qr-code" \
+curl -X POST "http://localhost:8080/api/backend/auth/telegram-bot/qr-code" \
   -H "Content-Type: application/json" \
   -d '{"botUrl": "https://t.me/your_bot_username"}'
 
 # Авторизация по коду
-curl -X POST "http://localhost:8080/api/auth/telegram-bot/login" \
+curl -X POST "http://localhost:8080/api/backend/auth/telegram-bot/login" \
   -H "Content-Type: application/json" \
   -d '{"code": 123456}'
 ```
