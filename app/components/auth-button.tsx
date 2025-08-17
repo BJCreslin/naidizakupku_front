@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { LogIn, LogOut, User, Loader2 } from 'lucide-react'
 import { useAuthContext } from './auth-provider'
+import { AuthModal } from './auth-modal'
 
 interface AuthButtonProps {
   className?: string
@@ -13,6 +14,7 @@ export function AuthButton({ className = '', showUserInfo = false }: AuthButtonP
   const { user, isLoading, isAuthenticated, isTelegramApp, login, logout } = useAuthContext()
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   const handleLogin = async () => {
     setIsLoggingIn(true)
@@ -92,10 +94,21 @@ export function AuthButton({ className = '', showUserInfo = false }: AuthButtonP
   }
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <span className="text-sm text-muted-foreground">
-        Откройте в Telegram
-      </span>
-    </div>
+    <>
+      <div className={`flex items-center gap-2 ${className}`}>
+        <button
+          onClick={() => setIsAuthModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+        >
+          <LogIn size={16} />
+          <span>Войти через Telegram</span>
+        </button>
+      </div>
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
+    </>
   )
 }

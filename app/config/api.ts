@@ -30,6 +30,11 @@ export const API_CONFIG = {
         LOGOUT: '/auth/telegram/logout',
         LOGOUT_ALL: '/auth/telegram/logout/all',
       },
+      TELEGRAM_BOT: {
+        INFO: '/auth/telegram-bot/info',
+        QR_CODE: '/auth/telegram-bot/qr-code',
+        LOGIN: '/auth/telegram-bot/login',
+      },
       VERIFY_TOKEN: '/v1/verify-token',
     },
     
@@ -112,6 +117,9 @@ export const API_URLS = {
     TELEGRAM_SESSION: buildAuthUrl('TELEGRAM.SESSION'),
     TELEGRAM_LOGOUT: buildAuthUrl('TELEGRAM.LOGOUT'),
     TELEGRAM_LOGOUT_ALL: buildAuthUrl('TELEGRAM.LOGOUT_ALL'),
+    TELEGRAM_BOT_INFO: buildAuthUrl('TELEGRAM_BOT.INFO'),
+    TELEGRAM_BOT_QR_CODE: buildAuthUrl('TELEGRAM_BOT.QR_CODE'),
+    TELEGRAM_BOT_LOGIN: buildAuthUrl('TELEGRAM_BOT.LOGIN'),
     VERIFY_TOKEN: buildAuthUrl('VERIFY_TOKEN'),
   },
 } as const

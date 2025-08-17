@@ -10,6 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isTelegramApp: boolean
   login: () => Promise<boolean>
+  loginWithCode: (code: number) => Promise<boolean>
   logout: () => Promise<void>
   logoutAll: () => Promise<void>
   checkSession: () => Promise<boolean>

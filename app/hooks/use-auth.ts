@@ -29,6 +29,7 @@ interface UseAuthReturn {
   
   // Действия
   login: () => Promise<boolean>
+  loginWithCode: (code: number) => Promise<boolean>
   logout: () => Promise<void>
   logoutAll: () => Promise<void>
   checkSession: () => Promise<boolean>
@@ -138,7 +139,7 @@ export function useAuth(): UseAuthReturn {
     }
   }, [])
 
-  // Авторизация через Telegram
+  // Авторизация через Telegram Web App
   const login = useCallback(async (): Promise<boolean> => {
     try {
       setIsLoading(true)
@@ -194,6 +195,49 @@ export function useAuth(): UseAuthReturn {
       }
     } catch (error) {
       console.error('Error during login:', error)
+      setIsLoading(false)
+      return false
+    }
+  }, [])
+
+  // Авторизация через код от Telegram бота
+  const loginWithCode = useCallback(async (code: number): Promise<boolean> => {
+    try {
+      setIsLoading(true)
+      
+      // Отправляем код на сервер для валидации
+      const response = await fetch(API_URLS.AUTH.TELEGRAM_BOT_LOGIN, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      })
+
+      const data = await response.json()
+      
+      if (data.success && data.session) {
+        setUser(data.session)
+        setStoredUserData(data.session)
+        setIsAuthenticated(true)
+        
+        // Сохраняем sessionId и токен, если есть
+        if (data.session.sessionId) {
+          setStoredSessionId(data.session.sessionId)
+        }
+        if (data.token) {
+          setStoredToken(data.token)
+        }
+        
+        setIsLoading(false)
+        return true
+      } else {
+        console.error('Login with code failed:', data.error || data.message)
+        setIsLoading(false)
+        return false
+      }
+    } catch (error) {
+      console.error('Error during login with code:', error)
       setIsLoading(false)
       return false
     }
@@ -267,6 +311,7 @@ export function useAuth(): UseAuthReturn {
     isAuthenticated,
     isTelegramApp,
     login,
+    loginWithCode,
     logout,
     logoutAll,
     checkSession,

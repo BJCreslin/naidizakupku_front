@@ -85,3 +85,28 @@ export interface TokenVerifyResponse {
   message?: string
   error?: string
 }
+
+export interface TelegramBotInfo {
+  botUsername: string
+  botUrl: string
+  qrCodeUrl?: string
+}
+
+export interface TelegramBotInfoResponse {
+  success: boolean
+  botInfo?: TelegramBotInfo
+  error?: string
+}
+
+export interface TelegramBotQrCodeResponse {
+  success: boolean
+  qrCodeUrl?: string
+  error?: string
+}
+
+export interface TelegramBotLoginResponse {
+  success: boolean
+  session?: AuthSession
+  token?: string
+  error?: string
+}
