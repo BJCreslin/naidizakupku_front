@@ -110,9 +110,6 @@ pipeline {
                         echo "📊 PM2 status:"
                         sudo -u naidizakupku pm2 list
                         
-                        echo "📋 PM2 logs (last 10 lines):"
-                        sudo -u naidizakupku pm2 logs ${PM2_APP_NAME} --lines 10
-                        
                         echo "🎉 Deployment completed!"
                     '''
                 }
