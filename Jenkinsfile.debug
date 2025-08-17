@@ -57,35 +57,66 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Deploy files
+                    // Deploy files with detailed logging
                     sh '''
-                        echo "🚀 Deploying to server..."
+                        echo "🚀 Starting deployment..."
+                        echo "Current user: $(whoami)"
+                        echo "Current directory: $(pwd)"
+                        
+                        # Check if target directory exists
+                        if [ -d "${APP_DIR}" ]; then
+                            echo "✅ Target directory exists"
+                            ls -la ${APP_DIR}/
+                        else
+                            echo "❌ Target directory missing, creating..."
+                        fi
                         
                         # Create directory and set permissions
                         sudo mkdir -p ${APP_DIR}
                         sudo chown jenkins:jenkins ${APP_DIR}
                         
+                        echo "📋 Directory permissions after setup:"
+                        ls -la ${APP_DIR}/
+                        
                         # Stop and remove existing PM2 process
+                        echo "🛑 Stopping existing PM2 processes..."
                         sudo -u naidizakupku pm2 stop ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to stop"
                         sudo -u naidizakupku pm2 delete ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to delete"
                         
                         # Clean and copy files
+                        echo "🧹 Cleaning target directory..."
                         rm -rf ${APP_DIR}/*
+                        
+                        echo "📁 Copying files..."
                         cp -R ./* ${APP_DIR}/
+                        
+                        echo "🔐 Setting permissions..."
                         sudo chown -R naidizakupku:naidizakupku ${APP_DIR}
                         
-                        echo "✓ Files deployed successfully"
+                        echo "✅ Files deployed successfully"
+                        echo "📋 Final directory contents:"
+                        ls -la ${APP_DIR}/
                     '''
                     
-                    // Install dependencies and start
+                    // Install dependencies and start with detailed logging
                     sh '''
                         cd ${APP_DIR}
-                        
                         echo "📦 Installing production dependencies..."
+                        
+                        # Check if we're in the right directory
+                        echo "Current directory: $(pwd)"
+                        echo "Directory contents:"
+                        ls -la
+                        
+                        # Install dependencies
                         sudo -u naidizakupku npm ci --only=production
                         
                         echo "🔍 Checking .next directory..."
-                        if [ ! -d ".next" ]; then
+                        if [ -d ".next" ]; then
+                            echo "✅ .next directory exists"
+                            echo "Next.js build size: $(du -sh .next)"
+                            ls -la .next/
+                        else
                             echo "❌ .next directory missing - rebuilding..."
                             sudo -u naidizakupku npm run build
                         fi
@@ -96,6 +127,9 @@ pipeline {
                         
                         echo "📊 PM2 status:"
                         sudo -u naidizakupku pm2 list
+                        
+                        echo "📋 PM2 logs (last 10 lines):"
+                        sudo -u naidizakupku pm2 logs ${PM2_APP_NAME} --lines 10
                         
                         echo "🎉 Deployment completed!"
                     '''
@@ -113,6 +147,28 @@ pipeline {
         }
         failure {
             echo '❌ Deployment failed!'
+            script {
+                sh '''
+                    echo "🔍 Debugging deployment failure..."
+                    echo "Current directory: $(pwd)"
+                    echo "Directory contents:"
+                    ls -la
+                    
+                    if [ -d "${APP_DIR}" ]; then
+                        echo "Target directory contents:"
+                        ls -la ${APP_DIR}/
+                    fi
+                    
+                    echo "PM2 processes:"
+                    pm2 list || echo "PM2 not available"
+                    
+                    echo "System info:"
+                    whoami
+                    pwd
+                    echo "Environment:"
+                    env | grep -E "(NODE|PATH|USER)" || echo "No relevant env vars"
+                '''
+            }
         }
     }
 }
