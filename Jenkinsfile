@@ -73,7 +73,7 @@ pipeline {
                         sudo -u naidizakupku pm2 delete ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to delete (naidizakupku)"
                         
                         # Clean and copy files
-                        rm -rf ${APP_DIR}/*
+                        sudo rm -rf ${APP_DIR}/*
                         cp -R ./* ${APP_DIR}/
                         sudo chown -R naidizakupku:naidizakupku ${APP_DIR}
                         
