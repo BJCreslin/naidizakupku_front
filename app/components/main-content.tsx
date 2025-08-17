@@ -3,6 +3,7 @@
 import { TrendingUp, Calendar, MapPin, Briefcase, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { useProjectInfo } from '@/hooks/use-project-info'
+import { BACKEND_URLS } from '@/config/backend-urls'
 import { formatNumber, formatBudget } from '@/utils/format'
 import { AuthStatus } from './auth-status'
 
@@ -106,7 +107,7 @@ export function MainContent() {
   }
 
   const handleStartSearch = () => {
-    window.open('https://zakupki.gov.ru/epz/order/extendedsearch/results.html', '_blank')
+            window.open(BACKEND_URLS.EXTERNAL_APIS.ZAKUPKI_GOV.SEARCH, '_blank')
   }
 
   return (

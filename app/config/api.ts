@@ -1,56 +1,17 @@
-// API Configuration
+// API Configuration - использует централизованную конфигурацию URL
+import { BACKEND_URLS, buildBackendUrl, buildDirectApiUrl, READY_URLS } from './backend-urls'
+
 export const API_CONFIG = {
-  // Base URLs
-  BASE_URL: 'https://naidizakupku.ru',
-  BASE_URL_HTTP: 'http://naidizakupku.ru',
+  // Base URLs (перенаправляем на централизованную конфигурацию)
+  get BASE_URL() { return BACKEND_URLS.DOMAINS.PRODUCTION },
+  get BASE_URL_HTTP() { return BACKEND_URLS.DOMAINS.PRODUCTION_HTTP },
   
   // API Paths
-  API_PATH: '/api',
-  BACKEND_PATH: '/api/backend',
+  get API_PATH() { return BACKEND_URLS.API_PATHS.MAIN },
+  get BACKEND_PATH() { return BACKEND_URLS.API_PATHS.BACKEND },
   
-  // Endpoints
-  ENDPOINTS: {
-    // News endpoints
-    NEWS: {
-      TOP: '/news/top',
-    },
-    
-    // Admin endpoints
-    ADMIN: {
-      COMMON: {
-        INFO: '/admin/common/info',
-      },
-    },
-    
-    // Auth endpoints
-    AUTH: {
-      TELEGRAM: {
-        VALIDATE: '/auth/telegram/validate',
-        SESSION: '/auth/telegram/session',
-        LOGOUT: '/auth/telegram/logout',
-        LOGOUT_ALL: '/auth/telegram/logout/all',
-      },
-      TELEGRAM_BOT: {
-        INFO: '/auth/telegram-bot/info',
-        QR_CODE: '/auth/telegram-bot/qr-code',
-        LOGIN: '/auth/telegram-bot/login',
-      },
-      VERIFY_TOKEN: '/v1/verify-token',
-    },
-    
-    // User endpoints (для будущего использования)
-    USER: {
-      PROFILE: '/user/profile',
-      PURCHASES: '/user/purchases',
-    },
-    
-    // Tender endpoints (для будущего использования)
-    TENDERS: {
-      LIST: '/tenders',
-      DETAIL: '/tenders/:id',
-      SEARCH: '/tenders/search',
-    },
-  },
+  // Endpoints (перенаправляем на централизованную конфигурацию)
+  get ENDPOINTS() { return BACKEND_URLS.BACKEND_ENDPOINTS },
   
   // Headers
   DEFAULT_HEADERS: {
@@ -65,21 +26,9 @@ export const API_CONFIG = {
   },
 } as const
 
-// Helper functions для построения полных URL
-export const buildApiUrl = (endpoint: string, useHttps = true): string => {
-  // Если задан прямой BASE URL для backend (например, http://localhost:9000/api), используем его
-  const directBackendBaseUrl = process.env.BACKEND_BASE_URL
-  if (directBackendBaseUrl) return `${directBackendBaseUrl}${endpoint}`
-
-  const baseUrl = useHttps ? API_CONFIG.BASE_URL : API_CONFIG.BASE_URL_HTTP
-  return `${baseUrl}${API_CONFIG.BACKEND_PATH}${endpoint}`
-}
-
-// Функция для построения URL без /backend
-export const buildDirectApiUrl = (endpoint: string, useHttps = true): string => {
-  const baseUrl = useHttps ? API_CONFIG.BASE_URL : API_CONFIG.BASE_URL_HTTP
-  return `${baseUrl}${API_CONFIG.API_PATH}${endpoint}`
-}
+// Helper functions для построения полных URL (перенаправляем на централизованные функции)
+export const buildApiUrl = buildBackendUrl
+export { buildDirectApiUrl }
 
 export const buildNewsUrl = (endpoint: string): string => {
   return buildApiUrl(API_CONFIG.ENDPOINTS.NEWS[endpoint as keyof typeof API_CONFIG.ENDPOINTS.NEWS])
@@ -104,29 +53,15 @@ export const buildAuthUrl = (endpoint: string): string => {
   return buildApiUrl(endpointPath as string)
 }
 
-// Готовые URL для часто используемых endpoints
-export const API_URLS = {
-  NEWS: {
-    TOP: 'https://naidizakupku.ru/api/backend/news/top',
-    TOP_DIRECT: buildDirectApiUrl(API_CONFIG.ENDPOINTS.NEWS.TOP),
-  },
-  ADMIN: {
-    COMMON_INFO: 'https://naidizakupku.ru/api/backend/admin/common/info',
-  },
-  AUTH: {
-    TELEGRAM_VALIDATE: buildAuthUrl('TELEGRAM.VALIDATE'),
-    TELEGRAM_SESSION: buildAuthUrl('TELEGRAM.SESSION'),
-    TELEGRAM_LOGOUT: buildAuthUrl('TELEGRAM.LOGOUT'),
-    TELEGRAM_LOGOUT_ALL: buildAuthUrl('TELEGRAM.LOGOUT_ALL'),
-    TELEGRAM_BOT_INFO: buildAuthUrl('TELEGRAM_BOT.INFO'),
-    TELEGRAM_BOT_QR_CODE: buildAuthUrl('TELEGRAM_BOT.QR_CODE'),
-    TELEGRAM_BOT_LOGIN: buildAuthUrl('TELEGRAM_BOT.LOGIN'),
-    VERIFY_TOKEN: buildAuthUrl('VERIFY_TOKEN'),
-  },
-} as const
+// Готовые URL для часто используемых endpoints (перенаправляем на централизованные URL)
+export const API_URLS = READY_URLS
 
-// Типы для TypeScript
-export type ApiEndpoint = keyof typeof API_CONFIG.ENDPOINTS
-export type NewsEndpoint = keyof typeof API_CONFIG.ENDPOINTS.NEWS
-export type AdminEndpoint = keyof typeof API_CONFIG.ENDPOINTS.ADMIN
-export type AuthEndpoint = keyof typeof API_CONFIG.ENDPOINTS.AUTH
+// Типы для TypeScript (перенаправляем на централизованные типы)
+export type { 
+  BackendEndpoint, 
+  NewsEndpoint, 
+  AdminEndpoint, 
+  AuthEndpoint,
+  UserEndpoint,
+  TenderEndpoint 
+} from './backend-urls'

@@ -1,4 +1,5 @@
 import { Heart, Code, Coffee } from 'lucide-react'
+import { BACKEND_URLS } from '@/config/backend-urls'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -41,10 +42,10 @@ export function Footer() {
             </h3>
             <div className="space-y-2">
               <a
-                href="mailto:support@naidizakupku.ru"
+                href={`mailto:${BACKEND_URLS.EMAIL.SUPPORT}`}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
-                support@naidizakupku.ru
+                {BACKEND_URLS.EMAIL.SUPPORT}
               </a>
               <p className="text-sm text-muted-foreground">
                 Техническая поддержка

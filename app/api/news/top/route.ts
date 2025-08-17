@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { News, NewsResponse } from '@/types/news'
 import { NewsType } from '@/types/news'
 import { API_URLS, API_CONFIG, buildApiUrl } from '@/config/api'
+import { BACKEND_URLS } from '@/config/backend-urls'
 import { ApiHelpers } from '@/utils/api-helpers'
 
 export const runtime = 'nodejs'
@@ -13,7 +14,7 @@ const getFallbackNews = (): News[] => [
   {
     id: 1,
     title: "Изменения в федеральном законе о контрактной системе",
-    url: "https://zakupki.gov.ru/epz/news/1",
+    url: BACKEND_URLS.EXTERNAL_APIS.ZAKUPKI_GOV.NEWS.NEWS_1,
     publicationDate: "2024-01-15T10:30:00",
     content: "Внесены важные изменения в порядок проведения государственных закупок...",
     newsType: NewsType.GENERAL,
@@ -26,7 +27,7 @@ const getFallbackNews = (): News[] => [
   {
     id: 2,
     title: "Новые требования к поставщикам в 2024 году",
-    url: "https://zakupki.gov.ru/epz/news/2",
+    url: BACKEND_URLS.EXTERNAL_APIS.ZAKUPKI_GOV.NEWS.NEWS_2,
     publicationDate: "2024-01-14T14:20:00",
     content: "С 1 февраля вступают в силу обновленные требования к участникам закупок...",
     newsType: NewsType.GENERAL,
@@ -39,7 +40,7 @@ const getFallbackNews = (): News[] => [
   {
     id: 3,
     title: "Планируемые технические работы на портале",
-    url: "https://zakupki.gov.ru/epz/news/3",
+    url: BACKEND_URLS.EXTERNAL_APIS.ZAKUPKI_GOV.NEWS.NEWS_3,
     publicationDate: "2024-01-13T16:45:00",
     content: "Уведомляем о плановых технических работах на Единой информационной системе...",
     newsType: NewsType.GENERAL,
@@ -60,9 +61,9 @@ export async function GET() {
     const envBase = process.env.BACKEND_BASE_URL
     if (envBase) candidateUrls.push(`${envBase}/news/top`)
     // Локальный бэкенд по умолчанию (согласно nginx-* конфигу)
-    candidateUrls.push('http://127.0.0.1:9000/api/news/top')
+    candidateUrls.push(`${BACKEND_URLS.DOMAINS.LOCALHOST}${BACKEND_URLS.API_PATHS.MAIN}/news/top`)
     // Внешний бэкенд API через nginx (правильный путь)
-    candidateUrls.push('https://naidizakupku.ru/api/backend/news/top')
+    candidateUrls.push(`${BACKEND_URLS.DOMAINS.PRODUCTION}${BACKEND_URLS.API_PATHS.BACKEND}/news/top`)
 
     let apiResponse: Response | null = null
     let lastError: unknown = null

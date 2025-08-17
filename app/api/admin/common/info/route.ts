@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { ProjectInfoDto, ProjectInfoResponse } from '@/types/project'
 import { API_URLS, API_CONFIG, buildApiUrl } from '@/config/api'
+import { BACKEND_URLS } from '@/config/backend-urls'
 import { ApiHelpers } from '@/utils/api-helpers'
 
 // Отключаем кэширование для этого route

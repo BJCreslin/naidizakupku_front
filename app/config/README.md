@@ -1,114 +1,139 @@
-# API Configuration
+# Конфигурация API и URL
 
-Этот файл содержит централизованную конфигурацию для всех API endpoints приложения.
+## Обзор
 
-## Структура
+В проекте используется централизованная система конфигурации URL для всех внешних API и бэкенд-сервисов. Это обеспечивает единообразие и упрощает управление адресами.
 
-### `api.ts`
-Основной файл конфигурации API с константами и утилитами.
+## Файлы конфигурации
 
-### `utils/api-helpers.ts`
-Утилиты для работы с API, включая обработку ошибок и типизированные функции.
+### `backend-urls.ts` - Централизованная конфигурация URL
 
-## Использование
+Основной файл с всеми URL проекта:
 
-### 1. Импорт конфигурации
+```typescript
+import { BACKEND_URLS, READY_URLS, buildBackendUrl } from '@/config/backend-urls'
+```
+
+**Структура:**
+- `DOMAINS` - Основные домены (production, development, localhost)
+- `API_PATHS` - Пути API (/api, /api/backend)
+- `BACKEND_ENDPOINTS` - Все эндпоинты бэкенда
+- `EXTERNAL_APIS` - Внешние API (zakupki.gov.ru)
+- `DATABASE` - URL базы данных
+- `EMAIL` - Email адреса
+
+### `api.ts` - Совместимость с существующим кодом
+
+Файл для обратной совместимости, который перенаправляет на централизованную конфигурацию:
+
 ```typescript
 import { API_CONFIG, API_URLS, buildApiUrl } from '@/config/api'
 ```
 
-### 2. Использование готовых URL
-```typescript
-// Получение новостей
-const newsUrl = API_URLS.NEWS.TOP
+## Использование
 
-// Получение информации о проекте
-const projectInfoUrl = API_URLS.ADMIN.COMMON_INFO
+### Получение готовых URL
+
+```typescript
+import { READY_URLS } from '@/config/backend-urls'
+
+// Использование готовых URL
+const newsUrl = READY_URLS.NEWS_TOP
+const authUrl = READY_URLS.AUTH_TELEGRAM_VALIDATE
+const externalUrl = READY_URLS.ZAKUPKI_GOV_SEARCH
 ```
 
-### 3. Построение URL динамически
-```typescript
-// Построение URL для новостей
-const newsUrl = buildApiUrl('/news/top')
+### Построение URL динамически
 
-// Построение URL для админки
-const adminUrl = buildApiUrl('/admin/common/info')
+```typescript
+import { buildBackendUrl, buildDirectApiUrl } from '@/config/backend-urls'
+
+// Построение URL для бэкенда
+const url = buildBackendUrl('/news/top')
+
+// Построение URL без /backend
+const directUrl = buildDirectApiUrl('/news/top')
 ```
 
-### 4. Использование утилит
+### Доступ к конфигурации
+
 ```typescript
-import { ApiHelpers } from '@/utils/api-helpers'
+import { BACKEND_URLS } from '@/config/backend-urls'
 
-// GET запрос
-const response = await ApiHelpers.get<News[]>('/news/top')
+// Домены
+const prodDomain = BACKEND_URLS.DOMAINS.PRODUCTION
+const devDomain = BACKEND_URLS.DOMAINS.DEVELOPMENT
 
-// POST запрос
-const response = await ApiHelpers.post<User>('/user/profile', userData)
+// Внешние API
+const zakupkiNews = BACKEND_URLS.EXTERNAL_APIS.ZAKUPKI_GOV.NEWS.NEWS_1
 
-// Проверка здоровья API
-const isHealthy = await ApiHelpers.checkHealth()
+// Email
+const supportEmail = BACKEND_URLS.EMAIL.SUPPORT
 ```
 
-## Конфигурация
+## Переменные окружения
 
-### Base URLs
-- `BASE_URL`: HTTPS версия (https://naidizakupku.ru)
-- `BASE_URL_HTTP`: HTTP версия (http://naidizakupku.ru)
+### BACKEND_BASE_URL
 
-### API Paths
-- `API_PATH`: Базовый путь API (/api)
-- `BACKEND_PATH`: Путь к backend API (/api/backend)
+Переменная для переопределения базового URL бэкенда:
 
-### URL Building Functions
-- `buildApiUrl()`: Строит URL с `/api/backend` префиксом
-- `buildDirectApiUrl()`: Строит URL с `/api` префиксом (для прямого доступа к backend)
+```bash
+# Для разработки (локальный бэкенд)
+BACKEND_BASE_URL=http://localhost:9000/api
 
-### Endpoints
-Все endpoints организованы по категориям:
-- `NEWS`: Новости
-- `ADMIN`: Административные функции
-- `USER`: Пользовательские функции (для будущего использования)
-- `TENDERS`: Закупки (для будущего использования)
-
-### Headers
-Стандартные заголовки для всех API запросов:
-- `Content-Type: application/json`
-- `Accept: application/json`
-- `User-Agent`: Браузерный User-Agent
-
-### Cache
-Настройки кэширования:
-- `REVALIDATE`: 300 секунд (5 минут)
-
-## Добавление новых endpoints
-
-1. Добавьте новый endpoint в `API_CONFIG.ENDPOINTS`
-2. Создайте готовый URL в `API_URLS` если нужно
-3. Добавьте соответствующие типы в TypeScript
-
-### Пример добавления нового endpoint:
-```typescript
-// В API_CONFIG.ENDPOINTS
-TENDERS: {
-  LIST: '/tenders',
-  DETAIL: '/tenders/:id',
-  SEARCH: '/tenders/search',
-},
-
-// В API_URLS
-TENDERS: {
-  LIST: buildApiUrl(API_CONFIG.ENDPOINTS.TENDERS.LIST),
-  SEARCH: buildApiUrl(API_CONFIG.ENDPOINTS.TENDERS.SEARCH),
-},
+# Для продакшена
+BACKEND_BASE_URL=https://naidizakupku.ru/api
 ```
 
-## Изменение конфигурации
+### Localhost адреса
 
-Для изменения базовых настроек API достаточно отредактировать файл `api.ts`:
+В проекте используются localhost адреса для:
 
-- Изменить базовый URL: обновите `BASE_URL` и `BASE_URL_HTTP`
-- Изменить путь к API: обновите `BACKEND_PATH`
-- Изменить заголовки: обновите `DEFAULT_HEADERS`
-- Изменить кэширование: обновите `CACHE.REVALIDATE`
+1. **Локальная разработка** - `http://localhost:9000` для бэкенда
+2. **PM2 конфигурация** - для запуска Next.js приложения
+3. **Nginx прокси** - для проксирования запросов к бэкенду
+4. **База данных** - `localhost:5432` для PostgreSQL
+5. **Telegram Bot** - `http://localhost:8080` для локального тестирования
 
-Все изменения автоматически применятся ко всем API запросам в приложении.
+**Важно:** Localhost адреса используют HTTP для корректной работы в локальной среде.
+
+## Типы TypeScript
+
+```typescript
+import type { 
+  BackendEndpoint, 
+  NewsEndpoint, 
+  AdminEndpoint, 
+  AuthEndpoint,
+  UserEndpoint,
+  TenderEndpoint 
+} from '@/config/backend-urls'
+```
+
+## Миграция с старой системы
+
+### Старый способ:
+```typescript
+const url = 'https://naidizakupku.ru/api/backend/news/top'
+```
+
+### Новый способ:
+```typescript
+import { READY_URLS } from '@/config/backend-urls'
+const url = READY_URLS.NEWS_TOP
+```
+
+## Преимущества централизованной конфигурации
+
+1. **Единообразие** - Все URL в одном месте
+2. **Типобезопасность** - TypeScript типы для всех эндпоинтов
+3. **Легкость изменения** - Изменение URL в одном месте
+4. **Документированность** - Все URL задокументированы
+5. **Обратная совместимость** - Старый код продолжает работать
+
+## Добавление новых URL
+
+1. Добавить в `BACKEND_URLS` в соответствующую секцию
+2. Добавить в `READY_URLS` если URL часто используется
+3. Добавить TypeScript тип если необходимо
+4. Обновить документацию
