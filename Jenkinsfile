@@ -65,6 +65,10 @@ pipeline {
                         sudo mkdir -p ${APP_DIR}
                         sudo chown jenkins:jenkins ${APP_DIR}
                         
+                        # Create home directory for naidizakupku user
+                        sudo mkdir -p /home/naidizakupku
+                        sudo chown naidizakupku:naidizakupku /home/naidizakupku
+                        
                         # Stop and remove existing PM2 process (try different users)
                         echo "🛑 Stopping existing PM2 processes..."
                         pm2 stop ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to stop (current user)"
@@ -84,8 +88,8 @@ pipeline {
                     sh '''
                         cd ${APP_DIR}
                         
-                        echo "📦 Installing production dependencies..."
-                        sudo -u naidizakupku npm ci --only=production
+                        echo "📦 Installing all dependencies..."
+                        sudo -u naidizakupku npm ci
                         
                         echo "🔍 Checking .next directory..."
                         if [ ! -d ".next" ]; then
@@ -97,6 +101,7 @@ pipeline {
                         
                         # Switch to naidizakupku user and start PM2
                         sudo -u naidizakupku bash -c "
+                            export HOME=/home/naidizakupku
                             cd ${APP_DIR}
                             export PATH=\$PATH:/usr/local/bin:/usr/bin
                             pm2 start npm --name '${PM2_APP_NAME}' -- start
