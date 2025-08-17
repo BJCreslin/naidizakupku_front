@@ -65,9 +65,12 @@ pipeline {
                         sudo mkdir -p ${APP_DIR}
                         sudo chown jenkins:jenkins ${APP_DIR}
                         
-                        # Stop and remove existing PM2 process
-                        sudo -u naidizakupku pm2 stop ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to stop"
-                        sudo -u naidizakupku pm2 delete ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to delete"
+                        # Stop and remove existing PM2 process (try different users)
+                        echo "🛑 Stopping existing PM2 processes..."
+                        pm2 stop ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to stop (current user)"
+                        pm2 delete ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to delete (current user)"
+                        sudo -u naidizakupku pm2 stop ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to stop (naidizakupku)"
+                        sudo -u naidizakupku pm2 delete ${PM2_APP_NAME} 2>/dev/null || echo "No PM2 process to delete (naidizakupku)"
                         
                         # Clean and copy files
                         rm -rf ${APP_DIR}/*
@@ -91,11 +94,20 @@ pipeline {
                         fi
                         
                         echo "🚀 Starting application..."
-                        sudo -u naidizakupku pm2 start npm --name "${PM2_APP_NAME}" -- start
-                        sudo -u naidizakupku pm2 save
+                        
+                        # Switch to naidizakupku user and start PM2
+                        sudo -u naidizakupku bash -c "
+                            cd ${APP_DIR}
+                            export PATH=\$PATH:/usr/local/bin:/usr/bin
+                            pm2 start npm --name '${PM2_APP_NAME}' -- start
+                            pm2 save
+                        "
                         
                         echo "📊 PM2 status:"
                         sudo -u naidizakupku pm2 list
+                        
+                        echo "📋 PM2 logs (last 10 lines):"
+                        sudo -u naidizakupku pm2 logs ${PM2_APP_NAME} --lines 10
                         
                         echo "🎉 Deployment completed!"
                     '''
