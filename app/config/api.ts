@@ -100,6 +100,11 @@ export const buildAuthUrl = (endpoint: string): string => {
     ? endpoint.split('.').reduce((obj: any, key) => obj[key], API_CONFIG.ENDPOINTS.AUTH)
     : API_CONFIG.ENDPOINTS.AUTH[endpoint as keyof typeof API_CONFIG.ENDPOINTS.AUTH]
   
+  // Для Telegram бота используем backend путь, для остальных - прямой путь
+  if (endpointPath.includes('telegram-bot')) {
+    return buildApiUrl(endpointPath as string)
+  }
+  
   return buildDirectApiUrl(endpointPath as string)
 }
 
