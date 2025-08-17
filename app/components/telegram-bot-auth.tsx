@@ -22,7 +22,8 @@ interface AuthCodeResponse {
 
 export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
   const { loginWithCode } = useAuthContext()
-  const [step, setStep] = useState<'loading' | 'bot-info' | 'code-input' | 'verifying' | 'success' | 'error'>('loading')
+  const [step, setStep] = useState<'loading' | 'bot-info' | 'code-input' | 'success' | 'error'>('loading')
+  const [isVerifying, setIsVerifying] = useState(false)
   const [botInfo, setBotInfo] = useState<BotInfo | null>(null)
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
@@ -82,7 +83,7 @@ export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
     }
 
     try {
-      setStep('verifying')
+      setIsVerifying(true)
       setError('')
       
       const success = await loginWithCode(codeNumber)
@@ -90,11 +91,11 @@ export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
         setStep('success')
       } else {
         setError('Неверный код или время истекло')
-        setStep('code-input')
       }
     } catch (error) {
       setError('Ошибка при проверке кода')
-      setStep('code-input')
+    } finally {
+      setIsVerifying(false)
     }
   }
 
@@ -118,6 +119,7 @@ export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
     setCode('')
     setError('')
     setBotInfo(null)
+    setIsVerifying(false)
     fetchBotInfo()
   }
 
@@ -258,7 +260,7 @@ export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
                 placeholder="Введите код (например: 123456)"
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 maxLength={7}
-                disabled={step === 'verifying'}
+                disabled={isVerifying}
               />
               {error && (
                 <p className="text-sm text-destructive">{error}</p>
@@ -268,15 +270,15 @@ export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
             <div className="flex gap-2">
               <button
                 type="submit"
-                disabled={step === 'verifying' || !code.trim()}
+                disabled={isVerifying || !code.trim()}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {step === 'verifying' ? (
+                {isVerifying ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <CheckCircle className="h-4 w-4" />
                 )}
-                <span>{step === 'verifying' ? 'Проверка...' : 'Войти'}</span>
+                <span>{isVerifying ? 'Проверка...' : 'Войти'}</span>
               </button>
 
               <button
@@ -291,13 +293,7 @@ export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
         </div>
       )}
 
-      {/* Проверка кода */}
-      {step === 'verifying' && (
-        <div className="flex flex-col items-center justify-center p-6 space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Проверка кода...</p>
-        </div>
-      )}
+
     </div>
   )
 }
