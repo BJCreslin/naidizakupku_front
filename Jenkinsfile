@@ -7,57 +7,48 @@ pipeline {
         PM2_APP_NAME = 'naidizakupku-front'
     }
 
-        triggers {
-            githubPush()
-        }
-    
+    triggers {
+        githubPush()
+    }
 
     stages {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    # Check current Node.js version
-                    echo "Current Node.js version:"
+                    echo "Node.js version:"
                     node --version
                     npm --version
-                    
-                    # List files to verify package-lock.json exists
-                    echo "Files in current directory:"
-                    ls -la
-                    
-                    # Check if package-lock.json exists
+
+                    echo "Checking package-lock.json..."
                     if [ -f "package-lock.json" ]; then
-                        echo "package-lock.json found, using npm ci"
                         npm ci
                     else
-                        echo "package-lock.json not found, using npm install"
                         npm install
                     fi
                 '''
             }
         }
-        
+
         stage('Type Check') {
             steps {
                 sh 'npm run type-check'
             }
         }
-        
+
         stage('Lint') {
             steps {
                 sh 'npm run lint'
             }
         }
-        
+
         stage('Build') {
             steps {
                 sh '''
-                    echo "Building Next.js application..."
+                    echo "→ Building Next.js..."
                     npm run build
-                    
-                    echo "Build completed, checking .next directory:"
+
+                    echo "→ Checking build artifacts..."
                     ls -la .next/
-                    echo "Build artifacts:"
                     du -sh .next/
                 '''
             }
@@ -65,44 +56,45 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh '''
-                    echo "🚀 Starting deployment..."
+                sshagent(['naidizakupku-deploy-key']) {
+                    sh '''
+                        echo "🚀 Deploying to server..."
 
-                    # Копируем все файлы кроме node_modules
-                    echo "→ Syncing files to ${APP_DIR}..."
-                    rsync -av --delete --exclude=node_modules ./ ${APP_DIR}/
+                        rsync -avz --delete \
+                          --exclude='.git' \
+                          --exclude='node_modules' \
+                          --exclude='.next/cache' \
+                          ./ user@server:${APP_DIR}/
 
-                    cd ${APP_DIR}
+                        ssh -o StrictHostKeyChecking=no user@server "
+                          cd ${APP_DIR} &&
+                          echo '→ Installing production dependencies...' &&
+                          npm ci --only=production &&
+                          echo '→ Restarting PM2 app...' &&
+                          if pm2 list | grep -q '${PM2_APP_NAME}'; then
+                              pm2 restart ${PM2_APP_NAME} --update-env
+                          else
+                              pm2 start npm --name '${PM2_APP_NAME}' -- start
+                          fi &&
+                          pm2 save
+                        "
 
-                    echo "→ Installing production dependencies..."
-                    npm ci --only=production
-
-                    echo "→ Restarting PM2 app..."
-                    if pm2 list | grep -q "${PM2_APP_NAME}"; then
-                        pm2 restart ${PM2_APP_NAME}
-                    else
-                        pm2 start npm --name "${PM2_APP_NAME}" -- start
-                    fi
-
-                    pm2 save
-
-                    echo "🎉 Deployment completed successfully!"
-                '''
+                        echo "🎉 Deployment completed successfully!"
+                    '''
+                }
             }
         }
-
-
     }
-    
+
     post {
         always {
             cleanWs()
         }
         success {
-            echo 'Deployment successful!'
+            echo '✅ Deployment successful!'
         }
         failure {
-            echo 'Deployment failed!'
+            echo '❌ Deployment failed!'
         }
     }
 }
