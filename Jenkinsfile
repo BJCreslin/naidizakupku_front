@@ -79,6 +79,13 @@ pipeline {
                         # Clean and copy files
                         sudo rm -rf ${APP_DIR}/*
                         cp -R ./* ${APP_DIR}/
+                        
+                        # Ensure .next directory is copied (it might be hidden)
+                        if [ -d ".next" ]; then
+                            echo "📁 Copying .next directory..."
+                            cp -R .next ${APP_DIR}/
+                        fi
+                        
                         sudo chown -R naidizakupku:naidizakupku ${APP_DIR}
                         
                         echo "✓ Files deployed successfully"
@@ -91,11 +98,8 @@ pipeline {
                         echo "📦 Installing all dependencies..."
                         sudo -u naidizakupku npm ci
                         
-                        echo "🔍 Checking .next directory..."
-                        if [ ! -d ".next" ]; then
-                            echo "❌ .next directory missing - rebuilding..."
-                            sudo -u naidizakupku npm run build
-                        fi
+                        echo "🔍 Rebuilding application on server..."
+                        sudo -u naidizakupku npm run build
                         
                         echo "🚀 Starting application..."
                         
