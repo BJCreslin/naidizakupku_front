@@ -2,30 +2,11 @@ import { TelegramAuthData, AuthSession } from '@/types/auth'
 
 // Ключи для localStorage
 export const AUTH_KEYS = {
-  SESSION_ID: 'telegram_session_id',
   TOKEN: 'telegram_token',
   USER_DATA: 'telegram_user_data',
 } as const
 
-// Функции для работы с localStorage и cookies
-export const getStoredSessionId = (): string | null => {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(AUTH_KEYS.SESSION_ID)
-}
 
-export const setStoredSessionId = (sessionId: string): void => {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(AUTH_KEYS.SESSION_ID, sessionId)
-  // Также сохраняем в cookies для middleware
-  document.cookie = `telegram_session_id=${sessionId}; path=/; max-age=2592000; SameSite=Lax`
-}
-
-export const removeStoredSessionId = (): void => {
-  if (typeof window === 'undefined') return
-  localStorage.removeItem(AUTH_KEYS.SESSION_ID)
-  // Удаляем из cookies
-  document.cookie = 'telegram_session_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-}
 
 export const getStoredToken = (): string | null => {
   if (typeof window === 'undefined') return null
@@ -64,19 +45,16 @@ export const removeStoredUserData = (): void => {
 
 // Очистка всех данных авторизации
 export const clearAuthData = (): void => {
-  removeStoredSessionId()
   removeStoredToken()
   removeStoredUserData()
   // Очищаем все cookies авторизации
-  document.cookie = 'telegram_session_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
   document.cookie = 'telegram_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
 }
 
 // Проверка, авторизован ли пользователь
 export const isAuthenticated = (): boolean => {
-  const sessionId = getStoredSessionId()
   const token = getStoredToken()
-  return !!(sessionId || token)
+  return !!token
 }
 
 // Получение данных из Telegram Web App
@@ -131,7 +109,6 @@ export const isTelegramWebApp = (): boolean => {
 // Получение заголовков авторизации
 export const getAuthHeaders = (): Record<string, string> => {
   const token = getStoredToken()
-  const sessionId = getStoredSessionId()
   
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -139,10 +116,6 @@ export const getAuthHeaders = (): Record<string, string> => {
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
-  }
-
-  if (sessionId) {
-    headers['X-Session-ID'] = sessionId
   }
 
   return headers

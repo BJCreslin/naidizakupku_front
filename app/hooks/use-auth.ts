@@ -1,12 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { AuthSession, TelegramAuthData, ValidateTelegramResponse, SessionResponse, LogoutResponse, TokenVerifyResponse } from '@/types/auth'
+import { AuthSession, TelegramAuthData, ValidateTelegramResponse, TokenVerifyResponse } from '@/types/auth'
 import { API_URLS } from '@/config/api'
 import { 
-  getStoredSessionId, 
-  setStoredSessionId, 
-  removeStoredSessionId,
   getStoredToken,
   setStoredToken,
   removeStoredToken,
@@ -45,52 +42,31 @@ export function useAuth(): UseAuthReturn {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isTelegramApp, setIsTelegramApp] = useState(false)
 
-  // Проверка сессии при загрузке
-  const checkSession = useCallback(async (): Promise<boolean> => {
+  // Проверка токена при загрузке
+  const checkToken = useCallback(async (): Promise<boolean> => {
     try {
-      const sessionId = getStoredSessionId()
       const token = getStoredToken()
       
-      if (!sessionId && !token) {
+      if (!token) {
         setIsLoading(false)
         return false
       }
 
-      // Сначала проверяем токен, если есть
-      if (token) {
-        const isValid = await verifyToken()
-        if (isValid) {
-          setIsLoading(false)
-          return true
-        }
+      // Проверяем токен
+      const isValid = await verifyToken()
+      if (isValid) {
+        setIsLoading(false)
+        return true
       }
 
-      // Затем проверяем сессию
-      if (sessionId) {
-        const response = await fetch(`${API_URLS.AUTH_TELEGRAM_SESSION}/${sessionId}`, {
-          method: 'GET',
-          headers: getAuthHeaders(),
-        })
-
-        const data: SessionResponse = await response.json()
-        
-        if (data.success && data.session) {
-          setUser(data.session)
-          setStoredUserData(data.session)
-          setIsAuthenticated(true)
-          setIsLoading(false)
-          return true
-        }
-      }
-
-      // Если ничего не работает, очищаем данные
+      // Если токен недействителен, очищаем данные
       clearAuthData()
       setUser(null)
       setIsAuthenticated(false)
       setIsLoading(false)
       return false
     } catch (error) {
-      console.error('Error checking session:', error)
+      console.error('Error checking token:', error)
       clearAuthData()
       setUser(null)
       setIsAuthenticated(false)
@@ -118,7 +94,6 @@ export function useAuth(): UseAuthReturn {
       if (data.success && data.valid && data.user) {
         // Создаем объект сессии из данных пользователя
         const session: AuthSession = {
-          sessionId: 'token-based',
           telegramId: data.user.telegramId,
           username: data.user.username,
           firstName: data.user.firstName,
@@ -181,10 +156,7 @@ export function useAuth(): UseAuthReturn {
         setStoredUserData(data.session)
         setIsAuthenticated(true)
         
-        // Сохраняем sessionId и токен, если есть
-        if (data.session.sessionId) {
-          setStoredSessionId(data.session.sessionId)
-        }
+        // Сохраняем токен
         if (data.token) {
           setStoredToken(data.token)
         }
@@ -224,10 +196,7 @@ export function useAuth(): UseAuthReturn {
         setStoredUserData(data.session)
         setIsAuthenticated(true)
         
-        // Сохраняем sessionId и токен, если есть
-        if (data.session.sessionId) {
-          setStoredSessionId(data.session.sessionId)
-        }
+        // Сохраняем токен
         if (data.token) {
           setStoredToken(data.token)
         }
@@ -246,17 +215,14 @@ export function useAuth(): UseAuthReturn {
     }
   }, [])
 
-  // Выход из текущей сессии
+  // Выход из системы
   const logout = useCallback(async (): Promise<void> => {
     try {
-      const sessionId = getStoredSessionId()
-      
-      if (sessionId) {
-        await fetch(`${API_URLS.AUTH_TELEGRAM_LOGOUT}?sessionId=${sessionId}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders(),
-        })
-      }
+      // Можно добавить вызов API для инвалидации токена на сервере
+      // await fetch(API_URLS.AUTH_LOGOUT, {
+      //   method: 'POST',
+      //   headers: getAuthHeaders(),
+      // })
     } catch (error) {
       console.error('Error during logout:', error)
     } finally {
@@ -266,17 +232,14 @@ export function useAuth(): UseAuthReturn {
     }
   }, [])
 
-  // Выход из всех сессий
+  // Выход из всех устройств (если поддерживается сервером)
   const logoutAll = useCallback(async (): Promise<void> => {
     try {
-      const userData = getStoredUserData()
-      
-      if (userData?.telegramId) {
-        await fetch(`${API_URLS.AUTH_TELEGRAM_LOGOUT_ALL}?telegramId=${userData.telegramId}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders(),
-        })
-      }
+      // Можно добавить вызов API для инвалидации всех токенов пользователя
+      // await fetch(API_URLS.AUTH_LOGOUT_ALL, {
+      //   method: 'POST',
+      //   headers: getAuthHeaders(),
+      // })
     } catch (error) {
       console.error('Error during logout all:', error)
     } finally {
@@ -296,16 +259,15 @@ export function useAuth(): UseAuthReturn {
       // Сначала проверяем существующие данные в localStorage
       const existingUser = getStoredUserData()
       const existingToken = getStoredToken()
-      const existingSessionId = getStoredSessionId()
       
-      if (existingUser && (existingToken || existingSessionId)) {
+      if (existingUser && existingToken) {
         setUser(existingUser)
         setIsAuthenticated(true)
         setIsLoading(false)
         
-        // Фоновая проверка валидности сессии
+        // Фоновая проверка валидности токена
         setTimeout(async () => {
-          await checkSession()
+          await checkToken()
         }, 100)
         return
       }
@@ -317,8 +279,8 @@ export function useAuth(): UseAuthReturn {
           setIsLoading(false)
         }
       } else {
-        // Если не в Telegram, проверяем существующую сессию
-        await checkSession()
+        // Если не в Telegram, проверяем существующий токен
+        await checkToken()
       }
     }
 
@@ -342,8 +304,8 @@ export function useAuth(): UseAuthReturn {
 
     // Обработчик для восстановления состояния при фокусе окна
     const handleFocus = () => {
-      if (!isAuthenticated && (getStoredToken() || getStoredSessionId())) {
-        checkSession()
+      if (!isAuthenticated && getStoredToken()) {
+        checkToken()
       }
     }
 
@@ -365,7 +327,7 @@ export function useAuth(): UseAuthReturn {
     loginWithCode,
     logout,
     logoutAll,
-    checkSession,
+    checkToken,
     verifyToken,
     getAuthHeaders,
   }

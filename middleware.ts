@@ -12,12 +12,11 @@ export function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route))
   
   if (isProtectedRoute) {
-    // Проверяем наличие токена или sessionId в cookies
+    // Проверяем наличие токена в cookies
     const token = request.cookies.get('telegram_token')?.value
-    const sessionId = request.cookies.get('telegram_session_id')?.value
     
-    // Если нет ни токена, ни sessionId, перенаправляем на главную
-    if (!token && !sessionId) {
+    // Если нет токена, перенаправляем на главную
+    if (!token) {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }

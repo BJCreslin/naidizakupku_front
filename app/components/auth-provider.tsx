@@ -13,7 +13,7 @@ interface AuthContextType {
   loginWithCode: (code: number) => Promise<boolean>
   logout: () => Promise<void>
   logoutAll: () => Promise<void>
-  checkSession: () => Promise<boolean>
+  checkToken: () => Promise<boolean>
   verifyToken: () => Promise<boolean>
   getAuthHeaders: () => Record<string, string>
 }

@@ -33,7 +33,6 @@ export interface TelegramAuthData {
 }
 
 export interface AuthSession {
-  sessionId: string
   telegramId: number
   username?: string
   firstName: string
@@ -60,18 +59,7 @@ export interface ValidateTelegramResponse {
   error?: string
 }
 
-export interface SessionResponse {
-  success: boolean
-  session?: AuthSession
-  message?: string
-  error?: string
-}
 
-export interface LogoutResponse {
-  success: boolean
-  message?: string
-  error?: string
-}
 
 export interface TokenVerifyResponse {
   success: boolean
