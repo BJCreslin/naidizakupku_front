@@ -230,7 +230,7 @@ export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
               onClick={() => setStep('code-input')}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
-              У меня есть код
+              Ввести полученный код
             </button>
           </div>
         </div>
