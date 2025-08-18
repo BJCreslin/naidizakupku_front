@@ -63,16 +63,16 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Session Info */}
+          {/* Auth Info */}
           <div className="bg-white border border-border rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Информация о сессии
+              Информация об авторизации
             </h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">ID сессии:</span>
+                <span className="text-muted-foreground">ID пользователя:</span>
                 <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
-                  {user?.sessionId || 'N/A'}
+                  {user?.telegramId || 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -86,9 +86,9 @@ export default function ProfilePage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Тип:</span>
+                <span className="text-muted-foreground">Тип авторизации:</span>
                 <span className="text-gray-900">
-                  {user?.sessionId === 'token-based' ? 'JWT токен' : 'Сессия'}
+                  JWT токен
                 </span>
               </div>
             </div>

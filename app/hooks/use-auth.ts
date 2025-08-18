@@ -29,7 +29,7 @@ interface UseAuthReturn {
   loginWithCode: (code: number) => Promise<boolean>
   logout: () => Promise<void>
   logoutAll: () => Promise<void>
-  checkSession: () => Promise<boolean>
+  checkToken: () => Promise<boolean>
   verifyToken: () => Promise<boolean>
   
   // Утилиты
@@ -41,39 +41,6 @@ export function useAuth(): UseAuthReturn {
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isTelegramApp, setIsTelegramApp] = useState(false)
-
-  // Проверка токена при загрузке
-  const checkToken = useCallback(async (): Promise<boolean> => {
-    try {
-      const token = getStoredToken()
-      
-      if (!token) {
-        setIsLoading(false)
-        return false
-      }
-
-      // Проверяем токен
-      const isValid = await verifyToken()
-      if (isValid) {
-        setIsLoading(false)
-        return true
-      }
-
-      // Если токен недействителен, очищаем данные
-      clearAuthData()
-      setUser(null)
-      setIsAuthenticated(false)
-      setIsLoading(false)
-      return false
-    } catch (error) {
-      console.error('Error checking token:', error)
-      clearAuthData()
-      setUser(null)
-      setIsAuthenticated(false)
-      setIsLoading(false)
-      return false
-    }
-  }, [])
 
   // Проверка токена
   const verifyToken = useCallback(async (): Promise<boolean> => {
@@ -116,6 +83,39 @@ export function useAuth(): UseAuthReturn {
       return false
     }
   }, [])
+
+  // Проверка токена при загрузке
+  const checkToken = useCallback(async (): Promise<boolean> => {
+    try {
+      const token = getStoredToken()
+      
+      if (!token) {
+        setIsLoading(false)
+        return false
+      }
+
+      // Проверяем токен
+      const isValid = await verifyToken()
+      if (isValid) {
+        setIsLoading(false)
+        return true
+      }
+
+      // Если токен недействителен, очищаем данные
+      clearAuthData()
+      setUser(null)
+      setIsAuthenticated(false)
+      setIsLoading(false)
+      return false
+    } catch (error) {
+      console.error('Error checking token:', error)
+      clearAuthData()
+      setUser(null)
+      setIsAuthenticated(false)
+      setIsLoading(false)
+      return false
+    }
+  }, [verifyToken])
 
   // Авторизация через Telegram Web App
   const login = useCallback(async (): Promise<boolean> => {
@@ -285,7 +285,7 @@ export function useAuth(): UseAuthReturn {
     }
 
     initAuth()
-  }, []) // Убираем зависимости, чтобы избежать повторных вызовов
+  }, [checkToken, login]) // Добавляем зависимости
 
   // Сохранение состояния при изменении пользователя
   useEffect(() => {
@@ -316,7 +316,7 @@ export function useAuth(): UseAuthReturn {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [user, isAuthenticated, checkSession])
+  }, [user, isAuthenticated, checkToken])
 
   return {
     user,
