@@ -39,7 +39,7 @@ export function Navigation() {
               >
                 Главная
               </Link>
-              <a
+              <Link
                 href="/tenders"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive('/tenders') 
@@ -48,8 +48,8 @@ export function Navigation() {
                 }`}
               >
                 Тендеры
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/my-purchases"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive('/my-purchases') 
@@ -58,7 +58,7 @@ export function Navigation() {
                 }`}
               >
                 Мои закупки
-              </a>
+              </Link>
               <Link
                 href="/news"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -70,7 +70,7 @@ export function Navigation() {
                 Новости
               </Link>
               {isAuthenticated && (
-                <a
+                <Link
                   href="/profile"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive('/profile') 
@@ -79,7 +79,7 @@ export function Navigation() {
                   }`}
                 >
                   Профиль
-                </a>
+                </Link>
               )}
             </div>
           </div>
@@ -127,7 +127,7 @@ export function Navigation() {
               >
                 Главная
               </Link>
-              <a
+              <Link
                 href="/tenders"
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                   isActive('/tenders') 
@@ -137,8 +137,8 @@ export function Navigation() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Тендеры
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/my-purchases"
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                   isActive('/my-purchases') 
@@ -148,7 +148,7 @@ export function Navigation() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Мои закупки
-              </a>
+              </Link>
               <Link
                 href="/news"
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
@@ -161,7 +161,7 @@ export function Navigation() {
                 Новости
               </Link>
               {isAuthenticated && (
-                <a
+                <Link
                   href="/profile"
                   className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
                     isActive('/profile') 
@@ -171,7 +171,7 @@ export function Navigation() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Профиль
-                </a>
+                </Link>
               )}
             </div>
             {/* Mobile icons and auth */}

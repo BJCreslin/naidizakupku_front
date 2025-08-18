@@ -7,7 +7,7 @@ export const AUTH_KEYS = {
   USER_DATA: 'telegram_user_data',
 } as const
 
-// Функции для работы с localStorage
+// Функции для работы с localStorage и cookies
 export const getStoredSessionId = (): string | null => {
   if (typeof window === 'undefined') return null
   return localStorage.getItem(AUTH_KEYS.SESSION_ID)
@@ -16,11 +16,15 @@ export const getStoredSessionId = (): string | null => {
 export const setStoredSessionId = (sessionId: string): void => {
   if (typeof window === 'undefined') return
   localStorage.setItem(AUTH_KEYS.SESSION_ID, sessionId)
+  // Также сохраняем в cookies для middleware
+  document.cookie = `telegram_session_id=${sessionId}; path=/; max-age=2592000; SameSite=Lax`
 }
 
 export const removeStoredSessionId = (): void => {
   if (typeof window === 'undefined') return
   localStorage.removeItem(AUTH_KEYS.SESSION_ID)
+  // Удаляем из cookies
+  document.cookie = 'telegram_session_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
 }
 
 export const getStoredToken = (): string | null => {
@@ -31,11 +35,15 @@ export const getStoredToken = (): string | null => {
 export const setStoredToken = (token: string): void => {
   if (typeof window === 'undefined') return
   localStorage.setItem(AUTH_KEYS.TOKEN, token)
+  // Также сохраняем в cookies для middleware
+  document.cookie = `telegram_token=${token}; path=/; max-age=2592000; SameSite=Lax`
 }
 
 export const removeStoredToken = (): void => {
   if (typeof window === 'undefined') return
   localStorage.removeItem(AUTH_KEYS.TOKEN)
+  // Удаляем из cookies
+  document.cookie = 'telegram_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
 }
 
 export const getStoredUserData = (): AuthSession | null => {
@@ -59,6 +67,9 @@ export const clearAuthData = (): void => {
   removeStoredSessionId()
   removeStoredToken()
   removeStoredUserData()
+  // Очищаем все cookies авторизации
+  document.cookie = 'telegram_session_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  document.cookie = 'telegram_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
 }
 
 // Проверка, авторизован ли пользователь

@@ -59,7 +59,10 @@ export function useAuth(): UseAuthReturn {
       // Сначала проверяем токен, если есть
       if (token) {
         const isValid = await verifyToken()
-        if (isValid) return true
+        if (isValid) {
+          setIsLoading(false)
+          return true
+        }
       }
 
       // Затем проверяем сессию
@@ -290,6 +293,23 @@ export function useAuth(): UseAuthReturn {
       const isTgApp = isTelegramWebApp()
       setIsTelegramApp(isTgApp)
       
+      // Сначала проверяем существующие данные в localStorage
+      const existingUser = getStoredUserData()
+      const existingToken = getStoredToken()
+      const existingSessionId = getStoredSessionId()
+      
+      if (existingUser && (existingToken || existingSessionId)) {
+        setUser(existingUser)
+        setIsAuthenticated(true)
+        setIsLoading(false)
+        
+        // Фоновая проверка валидности сессии
+        setTimeout(async () => {
+          await checkSession()
+        }, 100)
+        return
+      }
+      
       // Если запущено в Telegram, пытаемся авторизоваться
       if (isTgApp) {
         const success = await login()
@@ -303,7 +323,38 @@ export function useAuth(): UseAuthReturn {
     }
 
     initAuth()
-  }, [login, checkSession, verifyToken])
+  }, []) // Убираем зависимости, чтобы избежать повторных вызовов
+
+  // Сохранение состояния при изменении пользователя
+  useEffect(() => {
+    if (user) {
+      setStoredUserData(user)
+    }
+  }, [user])
+
+  // Обработчик события beforeunload для сохранения состояния
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (user) {
+        setStoredUserData(user)
+      }
+    }
+
+    // Обработчик для восстановления состояния при фокусе окна
+    const handleFocus = () => {
+      if (!isAuthenticated && (getStoredToken() || getStoredSessionId())) {
+        checkSession()
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [user, isAuthenticated, checkSession])
 
   return {
     user,
