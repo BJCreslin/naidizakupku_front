@@ -2,6 +2,7 @@
 
 import { ProtectedRoute } from '@/components/protected-route'
 import { useAuthContext } from '@/components/auth-provider'
+import { useRouter } from 'next/navigation'
 import { Briefcase, Calendar, MapPin, DollarSign, Eye } from 'lucide-react'
 
 interface PurchaseItem {
@@ -17,6 +18,12 @@ interface PurchaseItem {
 
 export default function MyPurchasesPage() {
   const { user } = useAuthContext()
+  const router = useRouter()
+
+  const handleAuthSuccess = () => {
+    // После успешной авторизации остаемся на этой странице
+    // Страница автоматически перезагрузится и покажет контент
+  }
 
   // Мокап данных для демонстрации
   const purchases: PurchaseItem[] = [
@@ -198,7 +205,10 @@ export default function MyPurchasesPage() {
   )
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute 
+      customMessage="Для просмотра ваших закупок необходимо войти в систему через Telegram."
+      onAuthSuccess={handleAuthSuccess}
+    >
       <MyPurchasesContent />
     </ProtectedRoute>
   )

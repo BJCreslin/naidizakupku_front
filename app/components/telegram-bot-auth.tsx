@@ -6,6 +6,7 @@ import { useAuthContext } from './auth-provider'
 
 interface TelegramBotAuthProps {
   className?: string
+  onSuccess?: () => void
 }
 
 interface BotInfo {
@@ -20,7 +21,7 @@ interface AuthCodeResponse {
   error?: string
 }
 
-export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
+export function TelegramBotAuth({ className = '', onSuccess }: TelegramBotAuthProps) {
   const { loginWithCode } = useAuthContext()
   const [step, setStep] = useState<'loading' | 'bot-info' | 'code-input' | 'success' | 'error'>('loading')
   const [isVerifying, setIsVerifying] = useState(false)
@@ -89,6 +90,10 @@ export function TelegramBotAuth({ className = '' }: TelegramBotAuthProps) {
       const success = await loginWithCode(codeNumber)
       if (success) {
         setStep('success')
+        // Вызываем callback успешной авторизации
+        if (onSuccess) {
+          setTimeout(() => onSuccess(), 1000) // Небольшая задержка для показа сообщения об успехе
+        }
       } else {
         setError('Неверный код или время истекло')
       }

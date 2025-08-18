@@ -9,12 +9,16 @@ interface ProtectedRouteProps {
   children: ReactNode
   fallback?: ReactNode
   requireTelegram?: boolean
+  customMessage?: string
+  onAuthSuccess?: () => void
 }
 
 export function ProtectedRoute({ 
   children, 
   fallback,
-  requireTelegram = false 
+  requireTelegram = false,
+  customMessage,
+  onAuthSuccess
 }: ProtectedRouteProps) {
   const { user, isLoading, isAuthenticated, isTelegramApp } = useAuthContext()
 
@@ -43,9 +47,9 @@ export function ProtectedRoute({
               Требуется авторизация
             </h2>
             <p className="text-gray-600 mb-4">
-              Для доступа к этой странице необходимо войти в систему через Telegram.
+              {customMessage || 'Для доступа к этой странице необходимо войти в систему через Telegram.'}
             </p>
-            <AuthButton className="mx-auto" />
+            <AuthButton className="mx-auto" onAuthSuccess={onAuthSuccess} />
           </div>
         </div>
       </div>

@@ -8,9 +8,10 @@ import { AuthModal } from './auth-modal'
 interface AuthButtonProps {
   className?: string
   showUserInfo?: boolean
+  onAuthSuccess?: () => void
 }
 
-export function AuthButton({ className = '', showUserInfo = false }: AuthButtonProps) {
+export function AuthButton({ className = '', showUserInfo = false, onAuthSuccess }: AuthButtonProps) {
   const { user, isLoading, isAuthenticated, isTelegramApp, login, logout } = useAuthContext()
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -19,7 +20,10 @@ export function AuthButton({ className = '', showUserInfo = false }: AuthButtonP
   const handleLogin = async () => {
     setIsLoggingIn(true)
     try {
-      await login()
+      const success = await login()
+      if (success && onAuthSuccess) {
+        onAuthSuccess()
+      }
     } catch (error) {
       console.error('Login error:', error)
     } finally {
@@ -107,7 +111,8 @@ export function AuthButton({ className = '', showUserInfo = false }: AuthButtonP
       
       <AuthModal 
         isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={onAuthSuccess}
       />
     </>
   )

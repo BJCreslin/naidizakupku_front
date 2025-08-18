@@ -7,9 +7,10 @@ import { TelegramBotAuth } from './telegram-bot-auth'
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void
 }
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   if (!isOpen) return null
 
   return (
@@ -38,7 +39,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         
         {/* Content */}
         <div className="p-6">
-          <TelegramBotAuth />
+          <TelegramBotAuth onSuccess={onSuccess} />
         </div>
       </div>
     </div>

@@ -1,22 +1,39 @@
 'use client'
 
 import { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Menu, X, Search, Bell } from 'lucide-react'
 import { AuthButton } from './auth-button'
 import { UserMenu } from './user-menu'
 import { useAuthContext } from './auth-provider'
+import { AuthSuccessNotification } from './auth-success-notification'
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [showAuthSuccess, setShowAuthSuccess] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const { isAuthenticated } = useAuthContext()
+
+  const handleAuthSuccess = () => {
+    // Показываем уведомление об успешной авторизации
+    setShowAuthSuccess(true)
+    // После успешной авторизации перенаправляем на страницу "Мои закупки"
+    router.push('/my-purchases')
+  }
 
   const isActive = (path: string) => pathname === path
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border">
+    <>
+      {showAuthSuccess && (
+        <AuthSuccessNotification 
+          message="Авторизация успешна! Вы перенаправлены на страницу 'Мои закупки'."
+          onClose={() => setShowAuthSuccess(false)}
+        />
+      )}
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -49,16 +66,18 @@ export function Navigation() {
               >
                 Тендеры
               </Link>
-              <Link
-                href="/my-purchases"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive('/my-purchases') 
-                    ? 'text-primary font-semibold' 
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
-                Мои закупки
-              </Link>
+              {isAuthenticated && (
+                <Link
+                  href="/my-purchases"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive('/my-purchases') 
+                      ? 'text-primary font-semibold' 
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
+                >
+                  Мои закупки
+                </Link>
+              )}
               <Link
                 href="/news"
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -97,7 +116,7 @@ export function Navigation() {
             {isAuthenticated ? (
               <UserMenu />
             ) : (
-              <AuthButton />
+              <AuthButton onAuthSuccess={handleAuthSuccess} />
             )}
           </div>
 
@@ -138,17 +157,19 @@ export function Navigation() {
               >
                 Тендеры
               </Link>
-              <Link
-                href="/my-purchases"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive('/my-purchases') 
-                    ? 'text-primary bg-muted font-semibold' 
-                    : 'text-muted-foreground hover:bg-muted hover:text-primary'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Мои закупки
-              </Link>
+              {isAuthenticated && (
+                <Link
+                  href="/my-purchases"
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    isActive('/my-purchases') 
+                      ? 'text-primary bg-muted font-semibold' 
+                      : 'text-muted-foreground hover:bg-muted hover:text-primary'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Мои закупки
+                </Link>
+              )}
               <Link
                 href="/news"
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
@@ -191,7 +212,7 @@ export function Navigation() {
                   {isAuthenticated ? (
                     <UserMenu />
                   ) : (
-                    <AuthButton />
+                    <AuthButton onAuthSuccess={handleAuthSuccess} />
                   )}
                 </div>
               </div>
@@ -200,5 +221,6 @@ export function Navigation() {
         )}
       </div>
     </nav>
+    </>
   )
 } 
